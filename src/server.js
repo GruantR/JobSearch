@@ -1,15 +1,31 @@
 require('dotenv').config();
-
-const express = require('express');
-const app = express();
+const app = require('./app'); // Приложение Express
+const { initializeDatabase } = require('./models'); // Функция инициализации
 
 const PORT = process.env.PORT || 3000;
-const DB_HOST = process.env.DB_HOST;
 
-app.get('/',(req,res) => {
-    res.send(`Сервер запущен на порту ${PORT}`)
-});
+// Асинхронная функция запуска
+const startServer = async () => {
+  try {
+    // 1. Сначала инициализируем БД
+    console.log('🔄 Инициализация базы данных...');
+    const dbInitialized = await initializeDatabase();
+    
+    if (!dbInitialized) {
+      throw new Error('Не удалось инициализировать базу данных');
+    }
+    
+    // 2. Затем запускаем сервер
+    app.listen(PORT, () => {
+      console.log(`✅ Сервер запущен на порту ${PORT}`);
+      console.log(`🌐 http://localhost:${PORT}`);
+    });
+    
+  } catch (error) {
+    console.error('❌ Ошибка запуска сервера:', error);
+    process.exit(1); // Завершаем процесс с ошибкой
+  }
+};
 
-app.listen(PORT, ()=>{
-    console.log(`Сервер запущен на htpp://${DB_HOST}:${PORT}`)
-})
+// Запускаем сервер
+startServer();
