@@ -1,3 +1,4 @@
+//models/index.js
 const sequelize = require('../config/db');
 
 // Импортируем модели
