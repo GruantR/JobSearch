@@ -9,7 +9,7 @@ class UsersControllers {
             res.send (createdUser)
 
         } catch (err) {
-
+            next(err); // Передаем ошибку в центральный обработчик
         };
     };
 
@@ -18,7 +18,7 @@ class UsersControllers {
             const result = await usersServices.getUsers()
             res.send(result);
         }catch(err){
-
+            next(err); // Передаем ошибку в центральный обработчик
         };
     };
 

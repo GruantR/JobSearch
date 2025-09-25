@@ -1,5 +1,6 @@
 const express = require('express');
 const routes = require('./routes');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -13,5 +14,6 @@ function logger (req, res, next) {
 
 app.use(logger);
 app.use('/api', routes);
+app.use(errorHandler);
 
 module.exports = app;
