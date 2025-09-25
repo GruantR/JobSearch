@@ -9,13 +9,13 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: process.env.DIALECT || 'postgres',
-    // logging: (msg) => {
-    //   // Выводим только SQL-запросы, игнорируем метаданные
-    //   if (msg.includes('SELECT') || msg.includes('INSERT') || msg.includes('UPDATE') || msg.includes('DELETE')) {
-    //     console.log(msg);
-    //   }
-    // },
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    logging: (msg) => {
+      // Выводим только SQL-запросы, игнорируем метаданные
+      if (msg.includes('SELECT') || msg.includes('INSERT') || msg.includes('UPDATE') || msg.includes('DELETE')) {
+        console.log(msg);
+      }
+    },
+   // logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
         max: 5,        // Максимум соединений
         min: 0,        // Минимум соединений  

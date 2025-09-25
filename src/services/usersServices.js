@@ -1,20 +1,24 @@
 // usersServices.js
-const { models } = require('../models/index');
+const { models } = require("../models/index");
 const { User } = models;
-
-
+const bcrypt = require("bcrypt");
 
 class UsersServices {
-async createUser (info) {
-    const newUser = await User.create(info);
-    return newUser;
-};
+  async createUser(userData) {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
 
-async getUsers () {
+    const newUser = {
+      ...userData,
+      password: hashedPassword,
+    };
+    return await User.create(newUser);
+  }
+
+  async getUsers() {
     const users = await User.findAll({});
     return users;
+  }
 }
-
-};
 
 module.exports = new UsersServices();

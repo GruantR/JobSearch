@@ -3,7 +3,7 @@ const usersServices = require('../services/usersServices');
 
 class UsersControllers {
 
-    async createUser(req, res) {
+    async createUser(req, res, next) {
         try {
             const createdUser = await usersServices.createUser(req.body)
             res.send (createdUser)
@@ -13,7 +13,7 @@ class UsersControllers {
         };
     };
 
-    async getUsers (req,res) {
+    async getUsers (req,res, next) {
         try{
             const result = await usersServices.getUsers()
             res.send(result);
