@@ -27,8 +27,12 @@ class UsersControllers {
             const { email, password } = req.body;         
             const token = await usersServices.validatePassword(email, password);
             res.json({ token });
-        } catch (err) {
-            res.status(401).json({ err: err.message });
+        } catch (error) {
+             
+        if (error.message === 'Invalid email or password') {
+            return res.status(401).json({ error: 'Неверный логин или паролик' });
+        }
+        res.status(500).json({ error: 'Internal server error' });
         }
     }
 

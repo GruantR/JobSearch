@@ -25,11 +25,11 @@ class UsersServices {
       where: { email: email }
     });
     if (!data) {
-      return res.status(401).json({ message: "Неверный email или пароль" });
+      throw new Error ('Invalid email or password');
     }
     const isPasswordValid = await bcrypt.compare(password, data.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Неверный email или пароль" });
+      throw new Error ('Invalid email or password');
     };
 
     const token = jwt.sign(
