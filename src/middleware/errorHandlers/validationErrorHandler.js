@@ -7,7 +7,7 @@
  validationResult(req) просто читает из req._validationErrors
 Вся цепочка работает, потому что Express передает один и тот же объект req между всеми middleware
 */
-const { validationResult } = require('express-validator');
+const { validationResult } = require("express-validator");
 
 /**
  * Middleware для обработки ошибок валидации
@@ -16,22 +16,20 @@ const { validationResult } = require('express-validator');
 const handleValidationErrors = (req, res, next) => {
   // Получаем результаты валидации из express-validator
   const errors = validationResult(req);
-  console.log(errors);
-  
-  
+
   // Если есть ошибки валидации - возвращаем ответ с ошибками
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      message: 'Ошибка валидации данных',
-      errors: errors.array().map(error => ({
-        field: error.path,       // Название поля с ошибкой (email, password и т.д.)
-        message: error.msg,      // Сообщение об ошибке
-        value: error.value       // Значение которое ввел пользователь (опционально)
-      }))
+      message: "Ошибка валидации данных",
+      errors: errors.array().map((error) => ({
+        field: error.path, // Название поля с ошибкой (email, password и т.д.)
+        message: error.msg, // Сообщение об ошибке
+        value: error.value, // Значение которое ввел пользователь (опционально)
+      })),
     });
   }
-  
+
   // Если ошибок нет - переходим к следующему middleware/контроллеру
   next();
 };

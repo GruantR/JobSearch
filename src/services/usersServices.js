@@ -3,11 +3,19 @@ const { models } = require("../models/index");
 const { User } = models;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {ConflictError, AuthenticationError} = require('../errors/customErrors')
 
 
 class UsersServices {
   async createUser(userData) {
-    return await User.create(userData);
+    const {email, password} = userData;
+        // Проверка существования пользователя
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+          throw new ConflictError('Пользователь с таким email уже существует');
+        };
+        const user = await User.create({email, password})
+    return user;
   };
 
   async getUsers() {
@@ -24,12 +32,13 @@ class UsersServices {
     const data = await User.findOne({
       where: { email: email }
     });
+    
     if (!data) {
-      throw new Error ('Invalid email or password');
+      throw new AuthenticationError ('Неверный email или пароль');
     }
     const isPasswordValid = await bcrypt.compare(password, data.password);
     if (!isPasswordValid) {
-      throw new Error ('Invalid email or password');
+      throw new AuthenticationError ('Неверный email или пароль');
     };
 
     const token = jwt.sign(
@@ -39,7 +48,7 @@ class UsersServices {
     );
 
 
-    return token;
+    return {token,data};
   };
 
 
