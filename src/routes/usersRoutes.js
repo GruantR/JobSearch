@@ -8,7 +8,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
 
 router.post('/register', UsersRoutesValidation.validateDataRegisterUser(), handleValidationErrors,  UsersControllers.createUser);
 router.get('/', authorizeToken, UsersControllers.getUsers);
-router.post('/login', UsersControllers.loginUser);
+router.post('/login', UsersRoutesValidation.validateDataLoginUser(), handleValidationErrors, UsersControllers.loginUser);
 
 
 module.exports = router;
