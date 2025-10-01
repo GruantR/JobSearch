@@ -33,18 +33,12 @@ class UsersControllers {
   async loginUser(req, res, next) {
     try {
       const { email, password } = req.body;
-      const tokenAndUser = await usersServices.validatePassword(email, password);
-      const {token, data: user} = tokenAndUser
+      const tokenAndUser = await usersServices.authenticateUser(email, password);
+      const {token, user} = tokenAndUser
       res.json({
         success: true,
         message: 'Успешный вход в систему',
-        data: {
-          token: token,
-          user: { 
-            id: user.id, 
-            email: user.email, 
-          }
-        }
+        data: { token, user }
       });
   
     } catch (err) {
