@@ -7,8 +7,10 @@ const UsersRoutesValidation = require('../middleware/validators/usersRoutesValid
 const handleValidationErrors = require('../middleware/errorHandlers/validationErrorHandler');
 
 router.post('/register', UsersRoutesValidation.validateDataRegisterUser(), handleValidationErrors,  UsersControllers.createUser);
-router.get('/', authorizeToken, UsersControllers.getUsers);
 router.post('/login', UsersRoutesValidation.validateDataLoginUser(), handleValidationErrors, UsersControllers.loginUser);
+router.get('/', authorizeToken, UsersControllers.getUsers);
+router.get('/:id',authorizeToken, UsersControllers.getCurrentUser);
+
 
 
 module.exports = router;
