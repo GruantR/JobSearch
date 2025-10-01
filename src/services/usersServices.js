@@ -28,27 +28,29 @@ class UsersServices {
     return user;
   };
 
-  async validatePassword(email, password) {
-    const data = await User.findOne({
+  async authenticateUser(email, password) {
+    const user = await User.findOne({
       where: { email: email }
     });
     
-    if (!data) {
+    if (!user) {
       throw new AuthenticationError ('Неверный email или пароль');
     }
-    const isPasswordValid = await bcrypt.compare(password, data.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new AuthenticationError ('Неверный email или пароль');
     };
 
     const token = jwt.sign(
-      { userId: data.id.toString() },
+      { userId: user.id.toString(),
+        email: user.email
+       },
       process.env.SECRET_KEY,
       { expiresIn: "24h" }
     );
 
 
-    return {token,data};
+    return {token,user: {id: user.id,  email: user.email}};
   };
 
 
