@@ -69,8 +69,8 @@ class ForbiddenError extends AppError {
  * Ошибка "Не найдено" (пользователь, вакансия и т.д.)
  */
 class NotFoundError extends AppError {
-    constructor (resource = 'Ресурс'){
-        super (`${resource} не найден`, 404)
+    constructor (message = 'Ресурс не найден'){
+        super (message, 404)
     }
 }
 

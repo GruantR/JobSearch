@@ -1,6 +1,6 @@
 //usersControllers.js
 const usersServices = require("../services/usersServices");
-const { ValidationError } = require("../errors/customErrors");
+const { ValidationError, ForbiddenError, NotFoundError } = require("../errors/customErrors");
 
 class UsersControllers {
   async createUser(req, res, next) {
@@ -50,20 +50,50 @@ class UsersControllers {
         data: { users },
       });
     } catch (err) {
-      
+
     }
   }
 
   async getCurrentUser(req, res, next) {
     try {
+
+      if (req.params.id !== req.userId) {
+        throw new ForbiddenError('Нет доступа к данному ресурсу');
+      }
       const user = await usersServices.getUserById(req.userId);
+
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
+      }
       res.json({
         success: true,
         data: { user },
       });
     } catch (err) {
-        next(err);
+      next(err);
     }
+  }
+
+  async updateDataCurrentUser(req, res, next) {
+    try {
+        if (req.params.id !== req.userId) {
+        throw new ForbiddenError('Нет доступа к данному ресурсу');
+      }
+      const updateFields = {};
+      if (req.body.email) {updateFields.email = req.body.email};
+      if (req.body.password) {updateFields.password = req.body.password};
+
+      const user = await usersServices.patchDataUser(req.userId, updateFields);
+      
+      res.json({
+        succes:true,
+        data: {user}
+      })
+  
+    } catch (err) {
+      next(err);
+    }
+
   }
 }
 
