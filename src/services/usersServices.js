@@ -1,4 +1,4 @@
-// usersServices.js
+// src/services/usersServices.js
 const { models } = require("../models/index");
 const { User } = models;
 const bcrypt = require("bcrypt");
@@ -18,7 +18,9 @@ class UsersServices {
       throw new ConflictError("Пользователь с таким email уже существует");
     }
     const user = await User.create({ email, password });
-    return user;
+    return await User.findByPk(user.id, {
+      attributes: { exclude: ["password"] },
+    });
   }
 
   async authenticateUser(email, password) {
@@ -44,26 +46,42 @@ class UsersServices {
   }
 
   async getUsers() {
-    const users = await User.findAll({});
+    const users = await User.findAll({ attributes: { exclude: ["password"] } });
     return users;
   }
 
   async getUserById(id) {
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
     return user;
   }
 
   async patchDataUser(id, updateData) {
     const user = await User.findByPk(id);
     if (!user) {
-      throw new NotFoundError ('Пользователь не найден')
+      throw new NotFoundError("Пользователь не найден");
     }
-    await user.update(updateData)
+    await user.update(updateData);
 
-    return user
+    return {
+      id: user.id,
+      email: user.email,
+    };
   }
 
-
+  async dropUser(id) {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
+    await User.destroy({ where: { id: id } });
+    console.log(`Пользователь ${user.email} (ID: ${user.id}) удален`);
+    return {
+      id: user.id,
+      email: user.email
+    };
+  }
 }
 
 module.exports = new UsersServices();
