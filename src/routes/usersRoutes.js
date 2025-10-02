@@ -11,6 +11,7 @@ router.post('/login', UsersRoutesValidation.validateDataLoginUser(), handleValid
 router.get('/', authorizeToken, UsersControllers.getUsers);
 router.get('/:id',authorizeToken, UsersControllers.getCurrentUser);
 router.patch('/:id',authorizeToken, UsersControllers.updateDataCurrentUser);
+router.delete('/:id', authorizeToken, UsersControllers.deleteCurrentUser)
 
 
 

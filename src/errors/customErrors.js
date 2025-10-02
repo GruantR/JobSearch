@@ -91,6 +91,11 @@ class ValidationError extends AppError {
       super(message, 409);
     }
   }
+  class BadRequestError extends AppError {
+    constructor(message = 'Некорректные данные') {
+      super(message, 400);
+    }
+  }
 
   module.exports = {
     AppError,
@@ -98,6 +103,7 @@ class ValidationError extends AppError {
     ForbiddenError,
     NotFoundError,
     ValidationError,
-    ConflictError
+    ConflictError,
+    BadRequestError
   };
 
