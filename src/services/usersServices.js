@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const {
   ConflictError,
   AuthenticationError,
+  NotFoundError,
 } = require("../errors/customErrors");
 
 class UsersServices {
@@ -52,13 +53,15 @@ class UsersServices {
     return user;
   }
 
-  // async updateUser (id, updateDate) {
-  //   const user = await User.findByPk(id);
-  //   if (updateDate.password) {
-  //     updateDate.password = await bcrypt.hash(updateDate.password, 10); 
-  //   };
-    
-  // }
+  async patchDataUser(id, updateData) {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new NotFoundError ('Пользователь не найден')
+    }
+    await user.update(updateData)
+
+    return user
+  }
 
 
 }

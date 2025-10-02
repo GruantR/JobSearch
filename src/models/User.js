@@ -17,9 +17,9 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-            len: { 
-                args: [6, 100], 
-                msg: "Пароль должен быть не короче 6 символов" 
+            len: {
+                args: [6, 100],
+                msg: "Пароль должен быть не короче 6 символов"
             }
         }
     }
@@ -29,7 +29,20 @@ const User = sequelize.define('User', {
             if (user.password) {
                 user.password = await bcrypt.hash(user.password, 10);
             }
+        },
+            beforeUpdate: async (user) => {
+        // Проверяем, изменился ли пароль
+        if (user.changed('password') && user.password) {
+            user.password = await bcrypt.hash(user.password, 10);
+           /* 
+           user.changed('password') - Sequelize автоматически отслеживает измененные поля
+            Хук срабатывает автоматически при любом обновлении через Sequelize
+            Не нужно писать дополнительный код в сервисах
+            */
         }
+        
     }
+    }
+
 });
 module.exports = User;

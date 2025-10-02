@@ -10,6 +10,7 @@ router.post('/register', UsersRoutesValidation.validateDataRegisterUser(), handl
 router.post('/login', UsersRoutesValidation.validateDataLoginUser(), handleValidationErrors, UsersControllers.loginUser);
 router.get('/', authorizeToken, UsersControllers.getUsers);
 router.get('/:id',authorizeToken, UsersControllers.getCurrentUser);
+router.patch('/:id',authorizeToken, UsersControllers.updateDataCurrentUser);
 
 
 
