@@ -8,47 +8,6 @@ const {
 } = require("../errors/customErrors");
 
 class UsersControllers {
-  async createUser(req, res, next) {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        throw new ValidationError("Email и пароль обязательны");
-      }
-      const cleanEmail = email.trim().toLowerCase();
-      const createdUser = await usersServices.createUser({
-        email: cleanEmail,
-        password,
-      });
-      res.status(201).json({
-        success: true,
-        message: "Пользователь успешно зарегистрирован",
-        data: { createdUser },
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async loginUser(req, res, next) {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        throw new ValidationError("Email и пароль обязательны");
-      }
-      const tokenAndUser = await usersServices.authenticateUser(
-        email,
-        password
-      );
-      const { token, user } = tokenAndUser;
-      res.json({
-        success: true,
-        message: "Успешный вход в систему",
-        data: { token, user },
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
 
   async getUsers(req, res, next) {
     try {
@@ -58,22 +17,20 @@ class UsersControllers {
         message: "Список всех пользователей системы",
         data: { users },
       });
-    } catch (err) {}
+    } catch (err) {
+      next(err);
+    }
   }
 
   async getCurrentUser(req, res, next) {
     try {
-      if (req.params.id !== req.userId) {
-        throw new ForbiddenError("Нет доступа к данному ресурсу");
-      }
       const user = await usersServices.getUserById(req.userId);
-
       if (!user) {
         throw new NotFoundError("Пользователь не найден");
       }
       res.json({
         success: true,
-        message: `Инофрмация пользователя ${req.user.email}`,
+        message: `Информация пользователя ${user.email}`,
         data: { user },
       });
     } catch (err) {
@@ -83,9 +40,6 @@ class UsersControllers {
 
   async updateDataCurrentUser(req, res, next) {
     try {
-      if (req.params.id !== req.userId) {
-        throw new ForbiddenError("Нет доступа к данному ресурсу");
-      }
       const updateFields = {};
       if (req.body) {
         if (req.body.email) {
@@ -112,11 +66,6 @@ class UsersControllers {
 
   async deleteCurrentUser(req, res, next) {
     try {
-      if (req.params.id !== req.userId) {
-        throw new ForbiddenError(
-          `Нет доступа к данному ресурсу, Ваш id: ${req.userId}`
-        );
-      }
       const deletedUser = await usersServices.dropUser(req.userId);
       res.json({
         success: true,

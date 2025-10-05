@@ -10,40 +10,6 @@ const {
 } = require("../errors/customErrors");
 
 class UsersServices {
-  async createUser(userData) {
-    const { email, password } = userData;
-    // Проверка существования пользователя
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      throw new ConflictError("Пользователь с таким email уже существует");
-    }
-    const user = await User.create({ email, password });
-    return await User.findByPk(user.id, {
-      attributes: { exclude: ["password"] },
-    });
-  }
-
-  async authenticateUser(email, password) {
-    const user = await User.findOne({
-      where: { email: email },
-    });
-
-    if (!user) {
-      throw new AuthenticationError("Неверный email или пароль");
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new AuthenticationError("Неверный email или пароль");
-    }
-
-    const token = jwt.sign(
-      { userId: user.id.toString(), email: user.email },
-      process.env.SECRET_KEY,
-      { expiresIn: "24h" }
-    );
-
-    return { token, user: { id: user.id, email: user.email } };
-  }
 
   async getUsers() {
     const users = await User.findAll({ attributes: { exclude: ["password"] } });
@@ -75,7 +41,7 @@ class UsersServices {
     if (!user) {
       throw new NotFoundError('Пользователь не найден');
     }
-    await User.destroy({ where: { id: id } });
+    await User.destroy({ where: { id } });
     console.log(`Пользователь ${user.email} (ID: ${user.id}) удален`);
     return {
       id: user.id,
