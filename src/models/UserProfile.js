@@ -2,8 +2,9 @@
 const sequelize = require('../config/db');
 const DataTypes = require('sequelize');
 
-const User_profile = sequelize.define ('User_profile', {
-full_name: {
+const UserProfile = sequelize.define ('UserProfile', {
+fullName: {
+
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
@@ -14,7 +15,7 @@ full_name: {
         }
     }
 },
-phone_number: {
+phoneNumber: {
     type: DataTypes.STRING(20), // До 20 символов
     allowNull: true,
     validate: {
@@ -39,4 +40,4 @@ userId: {
     tableName: 'user_profiles'
 })
 
-module.exports = User_profile;
+module.exports = UserProfile;
