@@ -3,15 +3,15 @@ const sequelize = require('../config/db');
 
 // Импортируем модели
 const User = require('./User');
-const User_profile = require('./User_profile');
+const UserProfile = require('./UserProfile');
 
 
 // Определяем отношения
-User.hasOne(User_profile,{
+User.hasOne(UserProfile,{
       foreignKey: 'userId',
     onDelete: 'CASCADE'
 });
-User_profile.belongsTo(User, {
+UserProfile.belongsTo(User, {
   foreignKey: 'userId'
 });
 
@@ -19,7 +19,7 @@ User_profile.belongsTo(User, {
 const models = {
   sequelize,
   User,
-  User_profile
+  UserProfile
 };
 
 // Функция инициализации БД (НЕ вызывается сразу!)

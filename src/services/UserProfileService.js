@@ -1,9 +1,10 @@
+//src/services/userProfileController.js
 const {models} = require('../models/index');
-const {User_profile} = models;
+const {UserProfile} = models;
 
 class UserProfileService {
     async createUserProfile (info) {
-        const userProfile = await User_profile.create(info);
+        const userProfile = await UserProfile.create(info);
         return userProfile
     };
 
