@@ -1,17 +1,25 @@
-//models/index.js
+//src/models/index.js
 const sequelize = require('../config/db');
 
 // Импортируем модели
 const User = require('./User');
+const User_profile = require('./User_profile');
 
 
 // Определяем отношения
-
+User.hasOne(User_profile,{
+      foreignKey: 'userId',
+    onDelete: 'CASCADE'
+});
+User_profile.belongsTo(User, {
+  foreignKey: 'userId'
+});
 
 // Экспортируем модели и функцию инициализации
 const models = {
+  sequelize,
   User,
-  sequelize
+  User_profile
 };
 
 // Функция инициализации БД (НЕ вызывается сразу!)
@@ -22,7 +30,8 @@ const initializeDatabase = async () => {
     console.log('✅ База данных подключена');
     
     // 2. Синхронизируем с контролем режима
-    const syncOptions = {};
+    const syncOptions = {
+    };
     
     if (process.env.NODE_ENV === 'development') {
       // В development: alter: true - безопасно изменяет структуру
