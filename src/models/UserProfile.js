@@ -6,8 +6,10 @@ const UserProfile = sequelize.define ('UserProfile', {
 fullName: {
 
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: null,
     validate: {
+        // Валидация только для непустых значений
         notEmpty: { msg: "ФИО не может быть пустым" },
         len: {
             args: [2, 100],
@@ -18,14 +20,18 @@ fullName: {
 phoneNumber: {
     type: DataTypes.STRING(20), // До 20 символов
     allowNull: true,
+    defaultValue: null,
     validate: {
-        is: {
-            args: /^[\+]?[0-9\s\-\(\)]+$/, // +, цифры, пробелы, -, ()
-            msg: "Некорректный формат номера телефона"
-        },
-        len: {
-            args: [5, 20],
-            msg: "Номер должен быть от 5 до 20 символов"
+        isValidPhone(value) {
+            if (value && value.length > 0) {
+                const phoneRegex = /^[\+]?[0-9\s\-\(\)]+$/;
+                if (!phoneRegex.test(value)) {
+                  throw new Error("Некорректный формат номера телефона");
+                }
+                if (value.length < 5 || value.length > 20) {
+                  throw new Error("Номер должен быть от 5 до 20 символов");
+                }
+              }
         }
     }
 },

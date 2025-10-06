@@ -1,6 +1,6 @@
 // src/services/usersServices.js
 const { models } = require("../models/index");
-const { User } = models;
+const { User, UserProfile } = models;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {
@@ -41,6 +41,7 @@ class UsersServices {
     if (!user) {
       throw new NotFoundError('Пользователь не найден');
     }
+    await UserProfile.destroy({ where: { userId: id } });
     await User.destroy({ where: { id } });
     console.log(`Пользователь ${user.email} (ID: ${user.id}) удален`);
     return {

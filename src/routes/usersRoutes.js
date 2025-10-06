@@ -10,6 +10,8 @@ router.get('/me',authorizeToken, UsersControllers.getCurrentUser);
 router.patch('/me',authorizeToken, UsersControllers.updateDataCurrentUser);
 router.delete('/me', authorizeToken, UsersControllers.deleteCurrentUser);
 
-router.post('/profile', authorizeToken, UserProfileController.createProfileUser);
+router.get('/profile',authorizeToken, UserProfileController.getDataProfileUser),
+router.patch('/profile', authorizeToken, UserProfileController.patchDataProfileUser);
+
 
 module.exports = router;
