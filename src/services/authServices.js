@@ -1,6 +1,6 @@
 //src/services/authServices.js
 const { models } = require("../models/index");
-const { User } = models;
+const { User, UserProfile } = models;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {
@@ -19,6 +19,13 @@ class AuthService {
       throw new ConflictError("Пользователь с таким email уже существует");
     }
     const user = await User.create({ email, password });
+    await UserProfile.create({ 
+      userId: user.id
+      // fullName и phoneNumber будут null по умолчанию
+  },{
+    validate: false // Отключаем валидацию при создании пустого профиля
+  });
+
     return await User.findByPk(user.id, {
       attributes: { exclude: ["password"] },
     });

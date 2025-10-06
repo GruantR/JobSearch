@@ -15,7 +15,7 @@ class UsersControllers {
       res.json({
         success: true,
         message: "Список всех пользователей системы",
-        data: { users },
+        data: { users: users },
       });
     } catch (err) {
       next(err);
@@ -31,7 +31,7 @@ class UsersControllers {
       res.json({
         success: true,
         message: `Информация пользователя ${user.email}`,
-        data: { user },
+        data: { user: user },
       });
     } catch (err) {
       next(err);
@@ -57,7 +57,7 @@ class UsersControllers {
       res.json({
         success: true,
         message: "Данные успешно обновлены",
-        data: { user },
+        data: { user: user },
       });
     } catch (err) {
       next(err);
@@ -70,7 +70,7 @@ class UsersControllers {
       res.json({
         success: true,
         message: "Пользователь успешно удален из базы данных",
-        data: { deletedUser },
+        data: { user: deletedUser },
       });
     } catch (err) {
       next(err);
