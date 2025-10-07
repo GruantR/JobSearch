@@ -3,9 +3,8 @@
 const { body } = require("express-validator");
 /**
  * Класс для валидации аутентификации
- * Используем классы для лучшей структуризации и масштабируемости
  */
-class UsersRoutesValidation {
+class AuthRoutesValidation {
   /**
    * Валидация данных при регистрации
    * @returns {Array} Массив middleware валидации
@@ -48,4 +47,4 @@ class UsersRoutesValidation {
 
 };
 
-module.exports = new UsersRoutesValidation();
+module.exports = new AuthRoutesValidation();

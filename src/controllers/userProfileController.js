@@ -42,7 +42,7 @@ class UserProfileController {
       const updateProfile = await UserProfileService.updateUserProfile(profileData, userId);
       res.json({
         success: true,
-        message: "данные профиля успешно обновлены",
+        message: "Данные профиля успешно обновлены",
         data: {profile: updateProfile}
       })
     }catch(err){
