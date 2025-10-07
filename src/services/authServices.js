@@ -22,8 +22,6 @@ class AuthService {
     await UserProfile.create({ 
       userId: user.id
       // fullName и phoneNumber будут null по умолчанию
-  },{
-    validate: false // Отключаем валидацию при создании пустого профиля
   });
 
     return await User.findByPk(user.id, {

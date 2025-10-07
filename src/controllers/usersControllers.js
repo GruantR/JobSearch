@@ -43,7 +43,7 @@ class UsersControllers {
       const updateFields = {};
       if (req.body) {
         if (req.body.email) {
-          updateFields.email = req.body.email;
+          updateFields.email = req.body.email.trim().toLowerCase();;
         }
         if (req.body.password) {
           updateFields.password = req.body.password;

@@ -1,6 +1,7 @@
 //src/models/User_profile.js
 const sequelize = require('../config/db');
 const DataTypes = require('sequelize');
+const {ValidationError} = require('../errors/customErrors');
 
 const UserProfile = sequelize.define ('UserProfile', {
 fullName: {
@@ -9,11 +10,15 @@ fullName: {
     allowNull: true,
     defaultValue: null,
     validate: {
-        // Валидация только для непустых значений
-        notEmpty: { msg: "ФИО не может быть пустым" },
-        len: {
-            args: [2, 100],
-            msg: "ФИО должно быть от 2 до 100 символов"
+        isValidFullName(value) {
+            if(value & value.length > 0) {
+                if (value.length <2 || value.length > 100) {
+                    throw new ValidationError ("ФИО должно быть от 2 до 100 символов");
+                }
+                if (!value.trim()) {
+                    throw new ValidationError ("ФИО не может быть пустым")
+                }
+            }
         }
     }
 },
