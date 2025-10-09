@@ -1,8 +1,8 @@
 // src/routes/usersRoutes.js
 const express = require('express');
 const router = express.Router();
-const UsersControllers = require('../controllers/usersControllers');
-const UserProfileController = require('../controllers/userProfileController');
+const UsersControllers = require('../controllers/usersController');
+const UserProfileController = require('../controllers/userProfilesController');
 const authorizeToken = require('../middleware/authorizeToken');
 const UserRoutesValidation = require('../middleware/validators/userRoutesValidation');
 const handleValidationErrors = require('../middleware/errorHandlers/validationErrorHandler');

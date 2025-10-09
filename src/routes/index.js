@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const usersRoutes = require('./usersRoutes');
 const authRoutes = require('./authRoutes');
+const recruitersRoutes = require('./recruitersRoutes');
 
 router.get('/', (req, res) => {
     res.json({
@@ -17,5 +18,7 @@ router.get('/', (req, res) => {
 
 router.use('/auth', authRoutes); 
 router.use('/users', usersRoutes);
+router.use('/recruiters', recruitersRoutes);
+
 
 module.exports = router;

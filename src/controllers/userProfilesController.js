@@ -1,5 +1,5 @@
 //src/controllers/userProfileController.js
-const UserProfileService = require("../services/userProfileService");
+const UserProfileService = require("../services/userProfilesService");
 const { BadRequestError } = require("../errors/customErrors");
 
 class UserProfileController {
