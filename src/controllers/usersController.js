@@ -1,5 +1,5 @@
 //src/controllers/usersControllers.js
-const usersServices = require("../services/usersServices");
+const usersServices = require("../services/usersService");
 const {
   ValidationError,
   ForbiddenError,

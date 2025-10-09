@@ -1,7 +1,7 @@
 //src/services/userProfileService.js
 const { models } = require("../models/index");
 const { UserProfile } = models;
-const { ConflictError, NotFoundError } = require("../errors/customErrors");
+const {NotFoundError } = require("../errors/customErrors");
 
 class UserProfileService {
 

@@ -1,25 +1,65 @@
 //src/models/index.js
-const sequelize = require('../config/db');
+const sequelize = require("../config/db");
 
 // Импортируем модели
-const User = require('./User');
-const UserProfile = require('./UserProfile');
-
+const User = require("./User");
+const UserProfile = require("./UserProfile");
+const Recruiter = require("./Recruiter");
+const StatusHistory = require("./StatusHistory");
 
 // Определяем отношения
-User.hasOne(UserProfile,{
-      foreignKey: 'userId',
-    onDelete: 'CASCADE'
+// СВЯЗЬ ОДИН К ОДНОМУ
+// Со стороны User: "У одного пользователя есть один профиль"
+User.hasOne(UserProfile, {
+  foreignKey: "userId",           // В таблице UserProfile будет столбец userId
+  onDelete: "CASCADE",            // При удалении User - удалить и UserProfile
 });
+
+// Со стороны UserProfile: "Профиль принадлежит пользователю" 
 UserProfile.belongsTo(User, {
-  foreignKey: 'userId'
+  foreignKey: "userId",           // Уточняем, какой столбец является внешним ключом
 });
+/* 
+Sequelize понимает, что это отношение один-к-одному
+В таблице user_profiles будет столбец userId, который ссылается на id в таблице users
+При удалении пользователя, его профиль тоже удалится
+*/
+
+
+// СВЯЗЬ ОДИН КО МНОГИМ
+// Со стороны User: "У одного пользователя может быть много рекрутеров"
+User.hasMany(Recruiter, {
+  foreignKey: "userId",         // В таблице recruiters будет столбец userId
+  onDelete: "CASCADE",          // При удалении User - удалить все его рекрутеры
+});
+
+// Со стороны Recruiter: "Рекрутер принадлежит пользователю"
+Recruiter.belongsTo(User, {
+  foreignKey: "userId",         // Уточняем внешний ключ
+});
+
+Recruiter.hasMany(StatusHistory, {
+  foreignKey: 'entityId',
+  constraints: false,
+  scope: { entityType: 'recruiter' },
+  as: 'statusHistory'
+});
+// Для вакансий (когда добавим)
+// Vacancy.hasMany(StatusHistory, {
+//     foreignKey: 'entityId',
+//     constraints: false, 
+//     scope: { entityType: 'vacancy' },
+//     as: 'statusHistory'
+// });
+
 
 // Экспортируем модели и функцию инициализации
 const models = {
   sequelize,
   User,
-  UserProfile
+  UserProfile,
+  Recruiter,
+  StatusHistory,
 };
 
 // Функция инициализации БД (НЕ вызывается сразу!)
@@ -27,27 +67,26 @@ const initializeDatabase = async () => {
   try {
     // 1. Проверяем подключение
     await sequelize.authenticate();
-    console.log('✅ База данных подключена');
-    
+    console.log("✅ База данных подключена");
+
     // 2. Синхронизируем с контролем режима
-    const syncOptions = {
-    };
-    
-    if (process.env.NODE_ENV === 'development') {
+    const syncOptions = {};
+
+    if (process.env.NODE_ENV === "development") {
       // В development: alter: true - безопасно изменяет структуру
       syncOptions.alter = true;
-    } else if (process.env.NODE_ENV === 'test') {
+    } else if (process.env.NODE_ENV === "test") {
       // В test: force: true - пересоздает БД для чистых тестов
       syncOptions.force = true;
     }
     // В production: не используем force/alter - только миграции
-    
+
     await sequelize.sync(syncOptions);
-    console.log('✅ Модели синхронизированы');
-    
+    console.log("✅ Модели синхронизированы");
+
     return true;
   } catch (error) {
-    console.error('❌ Ошибка БД:', error);
+    console.error("❌ Ошибка БД:", error);
     return false;
   }
 };
