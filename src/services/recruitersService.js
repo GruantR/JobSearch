@@ -104,10 +104,10 @@ getStatusDescription(status) {
 
     // Авто-обновление даты контакта для активных статусов
     if (["in_process", "waiting"].includes(newStatus)) {
-      updateData.lastContact_date = new Date();
+      updateData.lastContactDate = new Date();
     }
 
-    await recruiter.update({ status: newStatus, lastContactDate: new Date() });
+    await recruiter.update(updateData);
     await statusHistoryService.addStatusChange(
       "recruiter",
       recruiterId,
