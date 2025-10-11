@@ -14,6 +14,7 @@ router.delete('/:id', authorizeToken, RecruiterController.deleteRecruiter);
 router.patch('/:id', authorizeToken, RecruiterController.patchRecruiterData);
 router.patch('/:id/status',authorizeToken, RecruiterController.updateRecruiterStatus)
 router.get('/:id/status',authorizeToken, StatusHistoryController.getRecruiterStatusHistory)
+router.get('/:id/with-history', authorizeToken, RecruiterController.getRecruiterWithHistory);
 
 
 

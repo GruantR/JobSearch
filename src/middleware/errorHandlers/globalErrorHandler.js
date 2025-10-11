@@ -1,3 +1,4 @@
+//src middleware/errorHandlers/globalErrorHandler.js
 const handleSequelizeErrors = require('./sequelizeErrorHandler');
 const {AppError} = require('../../errors/customErrors');
 

@@ -91,9 +91,18 @@ class RecruiterController {
       const newStatus = req.body.status;
       const notes = req.body.notes;
       const newRecruiterStatus = await RecruiterService.updateRecruiterStatus(id, userId, newStatus, notes);
+      const statusMessages = {
+        contacting: "📞 Начинаем общение с рекрутером",
+        waiting: "⏳ Ждем ответа от рекрутера", 
+        in_process: "💬 Активно общаемся с рекрутером",
+        got_offer: "🎉 ПОЗДРАВЛЯЕМ! Получен оффер!",
+        rejected: "❌ Общение завершено (отказ)",
+        archived: "📁 Рекрутер перемещен в архив"
+      };
+
       res.json({
         success: true,
-        message: 'Cтатус успешно изменён',
+        message: statusMessages[newStatus] || 'Статус успешно изменён',
         data: {
           newRecruiterStatus: newRecruiterStatus
         }
@@ -101,6 +110,24 @@ class RecruiterController {
 
 
     }catch(err) {
+      next(err);
+    }
+  };
+
+  async getRecruiterWithHistory(req, res, next) {
+    try {
+      const { id } = req.params;
+      const userId = req.userId;
+    
+      
+      const recruiter = await RecruiterService.getRecruiterWithHistory(id, userId);
+      
+      res.json({
+        success: true,
+        message: "Рекрутер с историей изменений",
+        data: { recruiter }
+      });
+    } catch (err) {
       next(err);
     }
   }

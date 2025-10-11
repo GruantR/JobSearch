@@ -38,19 +38,26 @@ Recruiter.belongsTo(User, {
   foreignKey: "userId",         // Уточняем внешний ключ
 });
 
+// Рекрутер имеет много записей истории
 Recruiter.hasMany(StatusHistory, {
   foreignKey: 'entityId',
   constraints: false,
-  scope: { entityType: 'recruiter' },
+  scope: { entityType: 'recruiter' }, // фильтр: только для рекрутеров, Sequelize автоматически добавлял условие WHERE entityType = 'recruiter' 
   as: 'statusHistory'
 });
-// Для вакансий (когда добавим)
+
+
+// Вакансия имеет много записей истории  
 // Vacancy.hasMany(StatusHistory, {
-//     foreignKey: 'entityId',
-//     constraints: false, 
-//     scope: { entityType: 'vacancy' },
-//     as: 'statusHistory'
+//   foreignKey: 'entityId', 
+//   constraints: false,
+//   scope: { entityType: 'vacancy' }, // фильтр: только для вакансий
+//   as: 'statusHistory'
 // });
+
+// Запись истории может принадлежать рекрутеру ИЛИ вакансии
+StatusHistory.belongsTo(Recruiter, { foreignKey: 'entityId', constraints: false });
+//StatusHistory.belongsTo(Vacancy, { foreignKey: 'entityId', constraints: false });
 
 
 // Экспортируем модели и функцию инициализации

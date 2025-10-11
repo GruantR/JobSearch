@@ -4,11 +4,11 @@ const sequelize = require('../config/db');
 
 const StatusHistory = sequelize.define("StatusHistory",{
     entityType: {
-        type: DataTypes.ENUM('recruiter', 'vacancy'),
+        type: DataTypes.ENUM('recruiter', 'vacancy'),  // к кому относится изменение
         allowNull: false
     },
     entityId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER,                        // ID того, к кому относится
         allowNull: false
     },
     oldStatus: {
