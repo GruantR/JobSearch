@@ -1,3 +1,5 @@
+//src middleware/errorHandlers/sequelizeErrorHandler.js
+
 // Импортируем встроенные ошибки из Sequelize ORM
 const {
   ValidationError, // Ошибки валидации данных модели

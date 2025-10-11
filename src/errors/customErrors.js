@@ -1,3 +1,4 @@
+//src/errors/customErrors.js
 /**
  * Базовый класс для всех кастомных ошибок приложения
  */
@@ -60,50 +61,59 @@ class AuthenticationError extends AppError {
  * Ошибка доступа (нет прав для действия)
  */
 class ForbiddenError extends AppError {
-    constructor (message = 'Доступ запрещен') {
-        super (message, 403)
-    }
+  constructor(message = "Доступ запрещен") {
+    super(message, 403);
+  }
 }
 
 /**
  * Ошибка "Не найдено" (пользователь, вакансия и т.д.)
  */
 class NotFoundError extends AppError {
-    constructor (message = 'Ресурс не найден'){
-        super (message, 404)
-    }
+  constructor(message = "Ресурс не найден") {
+    super(message, 404);
+  }
 }
 
 /**
  * Ошибка валидации данных (от Sequelize или бизнес-логики)
  */
 class ValidationError extends AppError {
-    constructor(message = 'Ошибка валидации данных') {
-      super(message, 400);
-    }
+  constructor(message = "Ошибка валидации данных") {
+    super(message, 400);
   }
+}
 
-  /**
+/**
  * Ошибка конфликта (уникальное поле уже существует)
  */
-  class ConflictError extends AppError {
-    constructor(message = 'Ресурс уже существует') {
-      super(message, 409);
-    }
+class ConflictError extends AppError {
+  constructor(message = "Ресурс уже существует") {
+    super(message, 409);
   }
-  class BadRequestError extends AppError {
-    constructor(message = 'Некорректные данные') {
-      super(message, 400);
-    }
+}
+class BadRequestError extends AppError {
+  constructor(message = "Некорректные данные") {
+    super(message, 400);
   }
+}
 
-  module.exports = {
-    AppError,
-    AuthenticationError,
-    ForbiddenError,
-    NotFoundError,
-    ValidationError,
-    ConflictError,
-    BadRequestError
-  };
+/**
+ * Ошибка валидации статусов
+ */
+class StatusValidationError extends AppError {
+  constructor(message = "Недопустимое изменение статуса") {
+    super(message, 400);
+  }
+}
 
+module.exports = {
+  AppError,
+  AuthenticationError,
+  ForbiddenError,
+  NotFoundError,
+  ValidationError,
+  ConflictError,
+  BadRequestError,
+  StatusValidationError,
+};

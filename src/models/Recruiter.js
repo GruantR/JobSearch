@@ -20,7 +20,7 @@ const Recruiters = sequelize.define('Recruiters', {
         type:DataTypes.STRING 
     },
     position: {
-        type:DataTypes.STRING 
+        type:DataTypes.STRING
     },
     status: {
         type: DataTypes.ENUM(
