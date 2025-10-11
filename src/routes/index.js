@@ -4,7 +4,8 @@ const router = express.Router();
 const usersRoutes = require('./usersRoutes');
 const authRoutes = require('./authRoutes');
 const recruitersRoutes = require('./recruitersRoutes');
-const analyticsRouter = require('./analyticsRoutes');
+const analyticsRoutes = require('./analyticsRoutes');
+const vacanciesRoutes = require('./vacanciesRoutes') 
 
 router.get('/', (req, res) => {
     res.json({
@@ -20,7 +21,8 @@ router.get('/', (req, res) => {
 router.use('/auth', authRoutes); 
 router.use('/users', usersRoutes);
 router.use('/recruiters', recruitersRoutes);
-router.use('/analytics', analyticsRouter)
+router.use('/vacancies', vacanciesRoutes);
+router.use('/analytics', analyticsRoutes);
 
 
 module.exports = router;

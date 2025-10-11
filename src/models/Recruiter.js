@@ -1,8 +1,8 @@
-//src/models/Recruiters.js
+//src/models/Recruiter.js
 const {DataTypes} = require ('sequelize');
 const sequelize = require('../config/db');
 
-const Recruiters = sequelize.define('Recruiters', {
+const Recruiters = sequelize.define('Recruiter', {
     userId: {
         type:DataTypes.INTEGER,
         allowNull: false,

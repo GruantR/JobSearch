@@ -6,6 +6,7 @@ const User = require("./User");
 const UserProfile = require("./UserProfile");
 const Recruiter = require("./Recruiter");
 const StatusHistory = require("./StatusHistory");
+const Vacancy = require("./Vacancy");
 
 // Определяем отношения
 // СВЯЗЬ ОДИН К ОДНОМУ
@@ -48,16 +49,16 @@ Recruiter.hasMany(StatusHistory, {
 
 
 // Вакансия имеет много записей истории  
-// Vacancy.hasMany(StatusHistory, {
-//   foreignKey: 'entityId', 
-//   constraints: false,
-//   scope: { entityType: 'vacancy' }, // фильтр: только для вакансий
-//   as: 'statusHistory'
-// });
+Vacancy.hasMany(StatusHistory, {
+  foreignKey: 'entityId', 
+  constraints: false,
+  scope: { entityType: 'vacancy' }, // фильтр: только для вакансий
+  as: 'statusHistory'
+});
 
 // Запись истории может принадлежать рекрутеру ИЛИ вакансии
 StatusHistory.belongsTo(Recruiter, { foreignKey: 'entityId', constraints: false });
-//StatusHistory.belongsTo(Vacancy, { foreignKey: 'entityId', constraints: false });
+StatusHistory.belongsTo(Vacancy, { foreignKey: 'entityId', constraints: false });
 
 
 // Экспортируем модели и функцию инициализации
@@ -67,6 +68,7 @@ const models = {
   UserProfile,
   Recruiter,
   StatusHistory,
+  Vacancy,
 };
 
 // Функция инициализации БД (НЕ вызывается сразу!)
