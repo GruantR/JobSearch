@@ -16,6 +16,22 @@ class StatusHistoryController {
         }catch(err){
             next(err);
         }
+    };
+
+    async getVacanciesStatusHistory (req,res,next) {
+        try {
+            const { id } = req.params;
+            const history = await StatusHistoryService.getStatusHistory('vacancy',id);
+            res.json({
+                success: true,
+                message: "История изменений статуса вакансии",
+                data: {
+                    data: {history}
+                }
+            })
+        }catch(err){
+            next(err);
+        }
     }
 };
 

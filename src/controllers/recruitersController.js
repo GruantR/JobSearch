@@ -124,7 +124,7 @@ class RecruiterController {
       
       res.json({
         success: true,
-        message: "Рекрутер с историей изменений",
+        message: "Рекрутер с историей изменений статуса",
         data: { recruiter }
       });
     } catch (err) {
