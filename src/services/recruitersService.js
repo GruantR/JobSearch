@@ -8,8 +8,34 @@ const {
 const statusHistoryService = require("./statusHistoryService");
 
 class RecruiterService {
+  // Добавим константу с допустимыми статусами
+  get validStatuses() {
+    return [
+      "contacting",
+      "waiting",
+      "in_process",
+      "got_offer",
+      "rejected",
+      "archived",
+    ];
+  }
+  
+  // Метод для валидации статуса
+  validateStatus(status) {
+    if (!this.validStatuses.includes(status)) {
+      throw new StatusValidationError(
+        `Недопустимый статус: "${status}". Допустимые статусы: ${this.validStatuses.join(
+          ", "
+        )}`
+      );
+    }
+    return true;
+  }
+
   async createRecruiter(info) {
-    const recruiter = await Recruiter.create(info);
+    // Валидируем статус перед созданием
+    const recruiterData = { ...info, status: 'contacting' };
+    const recruiter = await Recruiter.create(recruiterData);
     return recruiter;
   }
 
@@ -32,7 +58,9 @@ class RecruiterService {
       throw new NotFoundError("Рекрутер не найден");
     }
     await recruiter.destroy();
-    console.log(`рекрутер ${recruiter.fullName} (ID: ${recruiter.id}) удален`);
+    console.log(
+      `✅ Рекрутер удален: ${recruiter.fullName} (ID: ${recruiter.id})`
+    );
     return {
       id: recruiter.id,
       fullName: recruiter.fullName,
@@ -40,6 +68,12 @@ class RecruiterService {
   }
 
   async patchRecruiterData(id, userId, updateData) {
+    if (updateData.status) {
+      throw new StatusValidationError(
+        "Для изменения статуса рекрутера используйте метод updateRecruiterStatus"
+      );
+    }
+
     const recruiter = await Recruiter.findOne({ where: { id, userId } });
     if (!recruiter) {
       throw new NotFoundError("Рекрутер не найден");
@@ -48,10 +82,13 @@ class RecruiterService {
     return updateRecruiter;
   }
 
-   validateStatusTransition(oldStatus, newStatus) {
+  validateStatusTransition(oldStatus, newStatus) {
     if (oldStatus === newStatus) {
-        return true;
-      }
+      return true;
+    }
+
+    this.validateStatus(oldStatus);
+    this.validateStatus(newStatus);
     // Определяем разрешенные переходы
     const allowedTransitions = {
       contacting: ["waiting", "in_process", "rejected", "archived"],
@@ -80,14 +117,14 @@ class RecruiterService {
   }
 
   // Добавим метод с описаниями статусов
-getStatusDescription(status) {
+  getStatusDescription(status) {
     const descriptions = {
       contacting: "Установление контакта 📞",
-      waiting: "Ожидание ответа ⏳", 
+      waiting: "Ожидание ответа ⏳",
       in_process: "Активное общение 💬",
       got_offer: "Получен оффер 🎉",
       rejected: "Отказ ❌",
-      archived: "В архиве 📁"
+      archived: "В архиве 📁",
     };
     return descriptions[status] || status;
   }
@@ -101,6 +138,9 @@ getStatusDescription(status) {
 
     // Автоматические действия при смене статуса
     const updateData = { status: newStatus };
+    if (notes) {
+      updateData.notes = notes;
+    }
 
     // Авто-обновление даты контакта для активных статусов
     if (["in_process", "waiting"].includes(newStatus)) {
