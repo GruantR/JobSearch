@@ -10,8 +10,8 @@ router.post('/', authorizeToken, VacancyRoutesValidation.validateCreateVacancy()
 router.get('/', authorizeToken, VacanciesController.getVacancies);
 router.get('/:id', authorizeToken, VacanciesController.getVacancy);
 router.delete('/:id', authorizeToken, VacanciesController.deleteVacancy);
-router.patch('/:id', authorizeToken, VacanciesController.patchVacancyData);
-router.patch('/:id/status', authorizeToken, VacanciesController.updateVacancyStatus);
+router.patch('/:id', authorizeToken, VacancyRoutesValidation.validateUpdateVacancy(), handleValidationErrors, VacanciesController.patchVacancyData);
+router.patch('/:id/status', authorizeToken, VacancyRoutesValidation.validateUpdateVacancyStatus(), handleValidationErrors, VacanciesController.updateVacancyStatus);
 router.get('/:id/status',authorizeToken, StatusHistoryController.getVacanciesStatusHistory);
 router.get('/:id/with-history', authorizeToken, VacanciesController.getVacancyWithHistory);
 

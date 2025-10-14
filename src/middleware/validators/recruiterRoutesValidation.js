@@ -1,7 +1,7 @@
 // src/validation/recruiterRoutesValidation.js
 const { body } = require("express-validator");
 
-class RecruitersValidation {
+class RecruiterRoutesValidation {
   validateCreateRecruiter() {
     return [
       body("fullName")
@@ -127,7 +127,7 @@ class RecruitersValidation {
 
   validateUpdateRecruiterStatus() {
     return [
-      body("newStatus")
+      body("status")
         .notEmpty()
         .withMessage("Новый статус обязателен")
         .isIn(["contacting", "waiting", "in_process", "got_offer", "rejected", "archived"])
@@ -142,4 +142,4 @@ class RecruitersValidation {
   }
 }
 
-module.exports = new RecruitersValidation();
+module.exports = new RecruiterRoutesValidation();
