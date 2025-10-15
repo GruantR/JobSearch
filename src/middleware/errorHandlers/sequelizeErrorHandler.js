@@ -22,12 +22,23 @@ const {
  */
 const handleSequelizeErrors = (error) => {
   // Ошибка валидации Sequelize (непрохождение validate в модели)
+  // if (error instanceof ValidationError) {
+  //   // Преобразуем массив ошибок Sequelize в читаемое сообщение
+  //   // error.errors - это массив объектов с деталями каждой ошибки валидации
+  //   const messages = error.errors.map((err) => `${err.path}: ${err.message}`);
+  //   // Создаем нашу кастомную ошибку валидации
+  //   return new AppValidationError(messages.join(", "));
+  // }
+
   if (error instanceof ValidationError) {
-    // Преобразуем массив ошибок Sequelize в читаемое сообщение
-    // error.errors - это массив объектов с деталями каждой ошибки валидации
-    const messages = error.errors.map((err) => `${err.path}: ${err.message}`);
-    // Создаем нашу кастомную ошибку валидации
-    return new AppValidationError(messages.join(", "));
+    const structuredErrors = error.errors.map(err => ({
+      field: err.path,
+      message: err.message,
+      value: err.value || null
+    }));
+    
+    // Используем НОВУЮ кастомную ошибку
+    return new StructuredValidationError("Ошибка валидации данных", structuredErrors);
   }
 
   /*
@@ -52,6 +63,7 @@ AppValidationError {
 }
 
 */
+
 
   // Ошибка уникальности (duplicate key) - попытка создать дублирующую запись
   if (error instanceof UniqueConstraintError) {

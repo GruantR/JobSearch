@@ -12,22 +12,18 @@ const authorizeToken = async (req, res, next) => {
 
     // Проверяем наличие заголовка
     if (!authHeader) {
-      return res.status(401).json({
-        success: false,
-        message: "Требуется авторизация",
-        error: "Authorization header отсутствует",
-      });
+      throw new AuthenticationError(
+        "Требуется авторизация"
+      );
     }
 
     // Извлекаем токен (Bearer <token>)
     const token = authHeader.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Токен отсутствует",
-        error: "Bearer token не найден в заголовке",
-      });
+      throw new AuthenticationError(
+        "Токен отсутствует"
+      );
     }
 
     // Верифицируем токен с помощью async/await
@@ -68,10 +64,7 @@ const authorizeToken = async (req, res, next) => {
     }
 
     // Любые другие ошибки
-    return res.status(500).json({
-      success: false,
-      message: "Внутренняя ошибка сервера при проверке токена",
-    });
+    return next(new AuthenticationError("Ошибка проверки токена"));
   }
 };
 
