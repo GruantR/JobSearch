@@ -39,6 +39,16 @@ Recruiter.belongsTo(User, {
   foreignKey: "userId",         // Уточняем внешний ключ
 });
 
+User.hasMany(Vacancy, {
+  foreignKey: "userId",         // В таблице vacancy будет столбец userId
+  onDelete: "CASCADE",          // При удалении User - удалить все его вакансии
+});
+
+// Со стороны Vacancy: "Вакансия принадлежит пользователю"
+Vacancy.belongsTo(User, {
+  foreignKey: "userId",         // Уточняем внешний ключ
+});
+
 // Рекрутер имеет много записей истории
 Recruiter.hasMany(StatusHistory, {
   foreignKey: 'entityId',

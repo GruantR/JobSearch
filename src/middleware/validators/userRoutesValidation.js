@@ -32,7 +32,7 @@ class UserRoutesValidation {
           return true;
         }),
 
-      body("phomeNumber")
+      body("phoneNumber")
         .optional()
         .matches(
           /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/
