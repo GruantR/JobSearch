@@ -653,7 +653,7 @@ router.get('/profile',authorizeToken, UserProfileController.getDataProfileUser);
  *                   success: false
  *                   message: 'Доступ запрещен'
  *                   error: 'Недостаточно прав для внесения изменений данному пользователю'
-*       500:
+ *       500:
  *         description: Внутренняя ошибка сервера
  *         content:
  *           application/json:

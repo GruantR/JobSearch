@@ -1,3 +1,4 @@
+//src/routes/vacanciesRoutes.js
 const express = require('express');
 const router = express.Router();
 const VacanciesController = require('../controllers/VacanciesController');

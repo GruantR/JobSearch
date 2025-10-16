@@ -77,44 +77,168 @@ const options = {
           },
         },
         UserProfile: {
+          type: "object",
+          required: ["id", "userId"], // Обязательные поля
+          properties: {
+            id: {
+              type: "integer",
+              example: 1,
+              description: "Уникальный идентификатор профиля",
+            },
+            fullName: {
+              type: "string",
+              example: "Иван Иванов",
+              description: "Полное имя пользователя",
+              nullable: true,
+            },
+            phoneNumber: {
+              type: "string",
+              example: "+79991234567",
+              description: "Номер телефона пользователя",
+              nullable: true,
+            },
+            userId: {
+              type: "integer",
+              example: 1,
+              description: "ID пользователя, к которому привязан профиль",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-01-15T10:30:00.000Z",
+              description: "Дата создания профиля",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-01-20T15:45:00.000Z",
+              description: "Дата последнего обновления профиля",
+            },
+          },
+        },
+
+        Recruiter: {
+          type: "object",
+          required: ["id", "userId"], // Обязательные поля
+          properties: {
+            id: {
+              type: "integer",
+              example: 1,
+              description: "Уникальный идентификатор профиля",
+            },
+            userId: {
+              type: "integer",
+              example: 1,
+              description: "ID пользователя, к которому привязан профиль",
+            },
+            fullName: {
+              type: "string",
+              example: "Иванов Иван Иванович",
+              description: "ФИО рекретёра",
+            },
+            company: {
+              type: "string",
+              example: "Tech Company Inc.",
+              description: "Название компании рекретёра",
+            },
+            linkedinUrl: {
+              type: "string",
+              example: "https://linkedin.com/in/ivanov",
+              description: "Ссылка linkedin на рекретёра",
+            },
+            contactInfo: {
+              type: "string",
+              example: "ivanov@company.com, +79991234567",
+              description: "Контактные данные для связи с рекретёром",
+            },
+            position: {
+              type: "string",
+              example: "HR Manager",
+              description: "Занимаемая должность рекретёра в компании",
+            },
+            status: {
+              type: "string",
+              enum: [
+                "contacting",
+                "waiting",
+                "in_process",
+                "got_offer",
+                "rejected",
+                "archived",
+              ],
+              example: "contacting",
+              description: "текущий статус по общению с рекрутером",
+            },
+            notes: {
+              type: "string",
+              example: "Очень отзывчивый рекрутер",
+              description: "Любая заметка",
+            },
+            lastContactDate: {
+              type: "string",
+              format: "date-time",
+              example: "2024-01-15T10:30:00.000Z",
+              description: "Дата последнего изменения статуса",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-01-15T10:30:00.000Z",
+              description: "Дата создания профиля",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-01-20T15:45:00.000Z",
+              description: "Дата последнего обновления профиля",
+            },
+          },
+        },
+
+        StatusHistory: {
             type: "object",
-            required: ["id", "userId"], // Обязательные поля
+            required: ["id", "entityType", "entityId", "newStatus", "changedAt"],
             properties: {
               id: {
                 type: "integer",
                 example: 1,
-                description: "Уникальный идентификатор профиля"
+                description: "Уникальный идентификатор записи истории статусов",
               },
-              fullName: {
+              entityType: {
                 type: "string",
-                example: "Иван Иванов",
-                description: "Полное имя пользователя",
-                nullable: true
+                enum: ["recruiter", "vacancy"],
+                example: "recruiter",
+                description: "Тип сущности, к которой относится история статусов",
               },
-              phoneNumber: {
-                type: "string",
-                example: "+79991234567",
-                description: "Номер телефона пользователя",
-                nullable: true
-              },
-              userId: {
+              entityId: {
                 type: "integer",
                 example: 1,
-                description: "ID пользователя, к которому привязан профиль"
+                description: "ID сущности (рекрутера или вакансии)",
               },
-              createdAt: {
+              oldStatus: {
+                type: "string",
+                example: "contacting",
+                description: "Статус до изменения",
+                nullable: true
+              },
+              newStatus: {
+                type: "string",
+                example: "waiting",
+                description: "Статус после изменения",
+              },
+              notes: {
+                type: "string",
+                example: "Рекрутер запросил дополнительное время",
+                description: "Заметка, оставленная при изменении статуса",
+                nullable: true
+              },
+              changedAt: {
                 type: "string",
                 format: "date-time",
                 example: "2024-01-15T10:30:00.000Z",
-                description: "Дата создания профиля"
+                description: "Дата и время изменения статуса",
               },
-              updatedAt: {
-                type: "string",
-                format: "date-time",
-                example: "2024-01-20T15:45:00.000Z",
-                description: "Дата последнего обновления профиля"
-              }
-            }
+            },
           },
 
         // БАЗОВАЯ СХЕМА ОШИБКИ (общие поля)
@@ -129,10 +253,8 @@ const options = {
 
         // КАСТОМНЫЕ ОШИБКИ (401, 403, 409, 500)
         CustomErrorResponse: {
-            allOf: [
-              { $ref: '#/components/schemas/BaseErrorResponse' }
-            ]
-          },
+          allOf: [{ $ref: "#/components/schemas/BaseErrorResponse" }],
+        },
 
         // ОШИБКИ EXPRESS-VALIDATOR (400)
         ValidationErrorResponse: {
@@ -211,29 +333,7 @@ const options = {
         //   }
         // },
 
-        // Модель рекрутера (пример для будущего использования)
-        // Recruiter: {
-        //   type: 'object',
-        //   properties: {
-        //     id: {
-        //       type: 'integer',
-        //       example: 1
-        //     },
-        //     fullName: {
-        //       type: 'string',
-        //       example: 'Иван Иванов'
-        //     },
-        //     company: {
-        //       type: 'string',
-        //       example: 'Tech Company'
-        //     },
-        //     status: {
-        //       type: 'string',
-        //       enum: ['contacting', 'waiting', 'in_process', 'got_offer', 'rejected', 'archived'],
-        //       example: 'contacting'
-        //     }
-        //   }
-        // }
+
       },
     },
 
