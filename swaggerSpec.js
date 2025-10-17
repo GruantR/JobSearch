@@ -195,6 +195,96 @@ const options = {
           },
         },
 
+        Vacancy: {
+            type: "object",
+            required: ["id", "userId", "companyName", "jobTitle", "status"],
+            properties: {
+              id: {
+                type: "integer",
+                example: 1,
+                description: "Уникальный идентификатор вакансии",
+              },
+              userId: {
+                type: "integer",
+                example: 1,
+                description: "ID пользователя, к которому привязана вакансия",
+              },
+              companyName: {
+                type: "string",
+                example: "Tech Company Inc.",
+                description: "Название компании-работодателя",
+              },
+              jobTitle: {
+                type: "string",
+                example: "Frontend Developer",
+                description: "Название должности",
+              },
+              description: {
+                type: "string",
+                example: "Разработка пользовательских интерфейсов на React и TypeScript",
+                description: "Описание вакансии и требований",
+                nullable: true
+              },
+              sourcePlatform: {
+                type: "string",
+                example: "hh.ru",
+                description: "Платформа, где найдена вакансия",
+                nullable: true
+              },
+              source_url: {
+                type: "string",
+                example: "https://hh.ru/vacancy/123456",
+                description: "Ссылка на вакансию на источнике",
+                nullable: true
+              },
+              salary: {
+                type: "string",
+                example: "от 150 000 руб.",
+                description: "Информация о зарплате",
+                nullable: true
+              },
+              status: {
+                type: "string",
+                enum: ["found", "applied", "waiting", "interview", "offer", "rejected", "archived"],
+                example: "found",
+                description: "Текущий статус вакансии в процессе отклика",
+              },
+              applicationDate: {
+                type: "string",
+                format: "date-time",
+                example: "2024-01-15T10:30:00.000Z",
+                description: "Дата отправки отклика на вакансию",
+                nullable: true
+              },
+              lastContactDate: {
+                type: "string",
+                format: "date-time",
+                example: "2024-01-20T15:45:00.000Z",
+                description: "Дата последнего контакта по вакансии",
+                nullable: true
+              },
+              notes: {
+                type: "string",
+                example: "Интересная вакансия с современным стеком технологий",
+                description: "Дополнительные заметки по вакансии",
+                nullable: true
+              },
+              createdAt: {
+                type: "string",
+                format: "date-time",
+                example: "2024-01-15T10:30:00.000Z",
+                description: "Дата создания записи о вакансии",
+              },
+              updatedAt: {
+                type: "string",
+                format: "date-time",
+                example: "2024-01-20T15:45:00.000Z",
+                description: "Дата последнего обновления вакансии",
+              },
+            },
+          },
+          
+
         StatusHistory: {
             type: "object",
             required: ["id", "entityType", "entityId", "newStatus", "changedAt"],
@@ -239,7 +329,218 @@ const options = {
                 description: "Дата и время изменения статуса",
               },
             },
+
+            RecruitersStats: {
+                type: "object",
+                properties: {
+                  contacting: {
+                    type: "integer",
+                    example: 5,
+                    description: "Количество рекрутеров в статусе 'contacting'"
+                  },
+                  waiting: {
+                    type: "integer", 
+                    example: 3,
+                    description: "Количество рекрутеров в статусе 'waiting'"
+                  },
+                  in_process: {
+                    type: "integer",
+                    example: 2,
+                    description: "Количество рекрутеров в статусе 'in_process'"
+                  },
+                  got_offer: {
+                    type: "integer",
+                    example: 1,
+                    description: "Количество рекрутеров в статусе 'got_offer'"
+                  },
+                  rejected: {
+                    type: "integer",
+                    example: 2,
+                    description: "Количество рекрутеров в статусе 'rejected'"
+                  },
+                  archived: {
+                    type: "integer",
+                    example: 4,
+                    description: "Количество рекрутеров в статусе 'archived'"
+                  },
+                  total: {
+                    type: "integer",
+                    example: 17,
+                    description: "Общее количество рекрутеров"
+                  }
+                }
+              },
+              
+              RecruitmentFunnel: {
+                type: "object",
+                properties: {
+                  counts: {
+                    type: "object",
+                    properties: {
+                      notContacted: {
+                        type: "integer",
+                        example: 5,
+                        description: "Нашли, но еще не написали"
+                      },
+                      waitingResponse: {
+                        type: "integer",
+                        example: 3,
+                        description: "Написали, ждем ответа"
+                      },
+                      activeConversations: {
+                        type: "integer",
+                        example: 2,
+                        description: "Активно общаемся"
+                      },
+                      gotOffers: {
+                        type: "integer",
+                        example: 1,
+                        description: "Получили офферы"
+                      },
+                      rejected: {
+                        type: "integer",
+                        example: 2,
+                        description: "Получили отказы"
+                      }
+                    }
+                  },
+                  rates: {
+                    type: "object",
+                    properties: {
+                      responseRate: {
+                        type: "string",
+                        example: "60.0%",
+                        description: "Процент ответов на сообщения"
+                      },
+                      successRate: {
+                        type: "string",
+                        example: "16.7%",
+                        description: "Процент офферов от всех контактов"
+                      },
+                      engagementRate: {
+                        type: "string",
+                        example: "17.6%",
+                        description: "Общая активность"
+                      }
+                    }
+                  }
+                }
+              },
+              
+              VacanciesStats: {
+                type: "object",
+                properties: {
+                  found: {
+                    type: "integer",
+                    example: 10,
+                    description: "Количество вакансий в статусе 'found'"
+                  },
+                  applied: {
+                    type: "integer",
+                    example: 8,
+                    description: "Количество вакансий в статусе 'applied'"
+                  },
+                  waiting: {
+                    type: "integer",
+                    example: 4,
+                    description: "Количество вакансий в статусе 'waiting'"
+                  },
+                  interview: {
+                    type: "integer",
+                    example: 3,
+                    description: "Количество вакансий в статусе 'interview'"
+                  },
+                  offer: {
+                    type: "integer",
+                    example: 1,
+                    description: "Количество вакансий в статусе 'offer'"
+                  },
+                  rejected: {
+                    type: "integer",
+                    example: 2,
+                    description: "Количество вакансий в статусе 'rejected'"
+                  },
+                  archived: {
+                    type: "integer",
+                    example: 5,
+                    description: "Количество вакансий в статусе 'archived'"
+                  },
+                  total: {
+                    type: "integer",
+                    example: 33,
+                    description: "Общее количество вакансий"
+                  }
+                }
+              },
+              
+              VacanciesFunnel: {
+                type: "object",
+                properties: {
+                  counts: {
+                    type: "object",
+                    properties: {
+                      found: {
+                        type: "integer",
+                        example: 10,
+                        description: "Нашли, но не откликнулись"
+                      },
+                      applied: {
+                        type: "integer",
+                        example: 8,
+                        description: "Откликнулись"
+                      },
+                      inProcess: {
+                        type: "integer",
+                        example: 4,
+                        description: "Ведем общение"
+                      },
+                      interviews: {
+                        type: "integer",
+                        example: 3,
+                        description: "На собеседованиях"
+                      },
+                      offers: {
+                        type: "integer",
+                        example: 1,
+                        description: "Получили офферы"
+                      },
+                      rejected: {
+                        type: "integer",
+                        example: 2,
+                        description: "Получили отказы"
+                      }
+                    }
+                  },
+                  rates: {
+                    type: "object",
+                    properties: {
+                      applicationRate: {
+                        type: "string",
+                        example: "80.0%",
+                        description: "Процент откликов от найденных"
+                      },
+                      interviewRate: {
+                        type: "string",
+                        example: "37.5%",
+                        description: "Процент приглашений на собеседование от откликов"
+                      },
+                      offerRate: {
+                        type: "string",
+                        example: "33.3%",
+                        description: "Процент офферов от собеседований"
+                      },
+                      successRate: {
+                        type: "string",
+                        example: "12.5%",
+                        description: "Общий успех (офферы от всех откликов)"
+                      }
+                    }
+                  }
+                }
+              }
           },
+
+          
 
         // БАЗОВАЯ СХЕМА ОШИБКИ (общие поля)
         BaseErrorResponse: {

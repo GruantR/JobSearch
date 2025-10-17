@@ -7,7 +7,7 @@ class RecruiterController {
     try {        
       const data = { ...req.body, userId: req.userId };
       const recruiter = await RecruiterService.createRecruiter(data);
-      res.json({
+      res.status(201).json({
         success: true,
         message: "Рекрутёр успешно добавлен в БД",
         data: { recruiter: recruiter },

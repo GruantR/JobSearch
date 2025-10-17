@@ -133,7 +133,7 @@ class VacancyRoutesValidation {
 
   validateUpdateVacancyStatus() {
     return [
-      body("newStatus")
+      body("status")
         .notEmpty()
         .withMessage("Новый статус обязателен")
         .isIn(["found", "applied", "waiting", "interview", "offer", "rejected", "archived"])

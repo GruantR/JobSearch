@@ -183,6 +183,12 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.post('/', authorizeToken, RecruiterRoutesValidation.validateCreateRecruiter(), handleValidationErrors, RecruiterController.createRecruiter);
 
@@ -262,6 +268,12 @@ router.post('/', authorizeToken, RecruiterRoutesValidation.validateCreateRecruit
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.get('/', authorizeToken, RecruiterController.getRecruiters);
 
@@ -359,6 +371,12 @@ router.get('/', authorizeToken, RecruiterController.getRecruiters);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.get('/:id', authorizeToken, RecruiterController.getRecruiter);
 
@@ -452,12 +470,24 @@ router.get('/:id', authorizeToken, RecruiterController.getRecruiter);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CustomErrorResponse'
+ *             examples:
+ *               NotFound:
+ *                 summary: Рекрутер не найден
+ *                 value:
+ *                   success: false
+ *                   message: "Рекрутер не найден"
  *       500:
  *         description: Внутренняя ошибка сервера
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.delete('/:id', authorizeToken, RecruiterController.deleteRecruiter);
 
@@ -635,12 +665,24 @@ router.delete('/:id', authorizeToken, RecruiterController.deleteRecruiter);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CustomErrorResponse'
+ *             examples:
+ *               NotFound:
+ *                 summary: Рекрутер не найден
+ *                 value:
+ *                   success: false
+ *                   message: "Рекрутер не найден"
  *       500:
  *         description: Внутренняя ошибка сервера
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.patch('/:id', authorizeToken, RecruiterRoutesValidation.validateUpdateRecruiter(), handleValidationErrors, RecruiterController.patchRecruiterData);
 
@@ -773,12 +815,24 @@ router.patch('/:id', authorizeToken, RecruiterRoutesValidation.validateUpdateRec
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CustomErrorResponse'
+ *             examples:
+ *               NotFound:
+ *                 summary: Рекрутер не найден
+ *                 value:
+ *                   success: false
+ *                   message: "Рекрутер не найден"
  *       500:
  *         description: Внутренняя ошибка сервера
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.patch('/:id/status',authorizeToken, RecruiterRoutesValidation.validateUpdateRecruiterStatus(), handleValidationErrors, RecruiterController.updateRecruiterStatus);
 /**
@@ -865,12 +919,24 @@ router.patch('/:id/status',authorizeToken, RecruiterRoutesValidation.validateUpd
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CustomErrorResponse'
+ *             examples:
+ *               NotFound:
+ *                 summary: Рекрутер не найден
+ *                 value:
+ *                   success: false
+ *                   message: "Рекрутер не найден"
  *       500:
  *         description: Внутренняя ошибка сервера
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.get('/:id/status',authorizeToken, StatusHistoryController.getRecruiterStatusHistory);
 
@@ -960,12 +1026,24 @@ router.get('/:id/status',authorizeToken, StatusHistoryController.getRecruiterSta
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CustomErrorResponse'
+ *             examples:
+ *               NotFound:
+ *                 summary: Рекрутер не найден
+ *                 value:
+ *                   success: false
+ *                   message: "Рекрутер не найден"
  *       500:
  *         description: Внутренняя ошибка сервера
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BaseErrorResponse'
+ *             examples:
+ *               ServerError:
+ *                 summary: Ошибка сервера
+ *                 value:
+ *                   success: false
+ *                   message: 'Внутренняя ошибка сервера'
  */
 router.get('/:id/with-history', authorizeToken, RecruiterController.getRecruiterWithHistory);
 
