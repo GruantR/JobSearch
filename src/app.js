@@ -8,15 +8,20 @@ const globalErrorHandler = require('./middleware/errorHandlers/globalErrorHandle
 const cors = require('cors');
 
 // Настройка CORS
-app.use(cors({
-    origin: [
-      'https://jobsearch-xsjk.onrender.com', // ваш домен на Render
-      'http://localhost:3000' // для локальной разработки
-    ],
-    credentials: true, // если используете куки или аутентификацию
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-  }));
+// app.use(cors({
+//     origin: [
+//       'https://jobsearch-xsjk.onrender.com', // ваш домен
+//       'http://localhost:3000',               // для локальной разработки
+//       'http://localhost:3001'                // если фронтенд на другом порту
+//     ],
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+//     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+//   }));
+  
+
+  // Или для полного доступа (на время разработки):
+app.use(cors());
   
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
