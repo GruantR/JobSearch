@@ -7,11 +7,11 @@ class VacanciesController {
         ...req.body,
         userId: req.userId,
       });
-      res.json({
+      res.status(201).json({
         success: true,
         message: "Вакансия успешно добавленна",
         data: {
-          data: vacancy,
+          vacancy: vacancy,
         },
       });
     } catch (err) {
