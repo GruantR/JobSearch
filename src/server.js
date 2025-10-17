@@ -1,3 +1,4 @@
+//src/server.js
 require('dotenv').config();
 const app = require('./app'); // Приложение Express
 const { initializeDatabase } = require('./models'); // Функция инициализации

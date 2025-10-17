@@ -81,33 +81,70 @@ const models = {
   Vacancy,
 };
 
-// Функция инициализации БД (НЕ вызывается сразу!)
+// Функция инициализации БД на локальном ПК(НЕ вызывается сразу!)
+// const initializeDatabase = async () => {
+//   try {
+//     // 1. Проверяем подключение
+//     await sequelize.authenticate();
+//     console.log("✅ База данных подключена");
+
+//     // 2. Синхронизируем с контролем режима
+//     const syncOptions = {};
+
+//     if (process.env.NODE_ENV === "development") {
+//       // В development: alter: true - безопасно изменяет структуру
+//       syncOptions.alter = true;
+//     } else if (process.env.NODE_ENV === "test") {
+//       // В test: force: true - пересоздает БД для чистых тестов
+//       syncOptions.force = true;
+//     }
+//     // В production: не используем force/alter - только миграции
+
+//     await sequelize.sync(syncOptions);
+//     console.log("✅ Модели синхронизированы");
+
+//     return true;
+//   } catch (error) {
+//     console.error("❌ Ошибка БД:", error);
+//     return false;
+//   }
+// };
+
+// Функция инициализации БД
 const initializeDatabase = async () => {
   try {
     // 1. Проверяем подключение
     await sequelize.authenticate();
-    console.log("✅ База данных подключена");
+    console.log("✅ База данных Neon.tech подключена");
 
-    // 2. Синхронизируем с контролем режима
+    // 2. Синхронизируем с учетом режима
     const syncOptions = {};
 
     if (process.env.NODE_ENV === "development") {
       // В development: alter: true - безопасно изменяет структуру
       syncOptions.alter = true;
+      console.log("🔄 Режим разработки: используется alter");
     } else if (process.env.NODE_ENV === "test") {
       // В test: force: true - пересоздает БД для чистых тестов
       syncOptions.force = true;
+      console.log("🔄 Режим тестирования: используется force");
+    } else {
+      // В production: безопасный режим
+      syncOptions.alter = false;
+      console.log("🔒 Production режим: отключен auto-alter");
     }
-    // В production: не используем force/alter - только миграции
 
     await sequelize.sync(syncOptions);
-    console.log("✅ Модели синхронизированы");
+    console.log("✅ Модели синхронизированы с Neon.tech");
 
     return true;
   } catch (error) {
-    console.error("❌ Ошибка БД:", error);
+    console.error("❌ Ошибка подключения к Neon.tech:", error.message);
     return false;
   }
 };
+
+
+
 
 module.exports = { models, initializeDatabase }; // Контролируемый экспорт
