@@ -21,13 +21,13 @@ const options = {
     // Серверы, где доступно API
     servers: [
       {
+        url: 'https://jobsearch-xsjk.onrender.com/api',  // URL для продакшена
+        description: 'Production server',
+      },
+      {
         url: "http://localhost:3000/api", // URL для разработки
         description: "Development server",
       },
-        {
-          url: 'https://jobsearch-xsjk.onrender.com/api',  // URL для продакшена
-          description: 'Production server',
-        },
     ],
 
     // 🔹 КОМПОНЕНТЫ ДЛЯ ПЕРЕИСПОЛЬЗОВАНИЯ
