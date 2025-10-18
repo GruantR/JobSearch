@@ -1,59 +1,60 @@
 //src/config/db.js
-
-// const Sequelize = require('sequelize');
-// require("dotenv").config();
-
-
-// const sequelize = new Sequelize(
-//   process.env.DB_NAME,
-//   process.env.DB_USER,
-//   process.env.DB_PASS,
-//   {
-//     host: process.env.DB_HOST,
-//     dialect: process.env.DIALECT || 'postgres',
-//     logging: (msg) => {
-//       // Выводим только SQL-запросы, игнорируем метаданные
-//       if (msg.includes('SELECT') || msg.includes('INSERT') || msg.includes('UPDATE') || msg.includes('DELETE')) {
-//         console.log(msg);
-//       }
-//     },
-//    // logging: process.env.NODE_ENV === 'development' ? console.log : false,
-//     pool: {
-//         max: 5,        // Максимум соединений
-//         min: 0,        // Минимум соединений  
-//         acquire: 30000, // Время ожидания соединения
-//         idle: 10000    // Время простаивания
-//       }
-//   }
-// );
-
-// module.exports = sequelize;
-
-
 const Sequelize = require('sequelize');
-require("dotenv").config();
+require("dotenv-flow").config();
 
-// Для Neon.tech используем строку подключения напрямую
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false // Это важно для Neon.tech
+console.log('🔧 [DB Config] DATABASE_URL:', process.env.DATABASE_URL ? 'present' : 'missing');
+console.log('🔧 [DB Config] NODE_ENV:', process.env.NODE_ENV);
+
+let sequelize;
+
+if (process.env.DATABASE_URL) {
+  // Production - используем строку подключения от Neon
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: getLogging(),
+    pool: getPoolConfig()
+  });
+  console.log("🔗 [DB Config] Подключение к Neon.tech (Production)");
+} else {
+  // Development - используем отдельные переменные
+  sequelize = new Sequelize(
+    process.env.DB_NAME || 'job_search',
+    process.env.DB_USER || 'postgres', 
+    process.env.DB_PASS || 'password',
+    {
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 5432,
+      dialect: 'postgres',
+      logging: getLogging(),
+      pool: getPoolConfig()
     }
-  },
-  logging: (msg) => {
-    // Выводим только SQL-запросы, игнорируем метаданные
+  );
+  console.log("🔗 [DB Config] Подключение к локальной PostgreSQL (Development)");
+}
+
+
+// Функции для вынесения общей логики
+function getLogging() {
+  return (msg) => {
     if (msg.includes('SELECT') || msg.includes('INSERT') || msg.includes('UPDATE') || msg.includes('DELETE')) {
       console.log(msg);
     }
-  },
-  pool: {
+  };
+}
+
+function getPoolConfig() {
+  return {
     max: 5,
     min: 0,
     acquire: 30000,
     idle: 10000
-  }
-});
+  };
+}
 
 module.exports = sequelize;

@@ -13,7 +13,6 @@ class UsersServices {
 
   async getUsers() {
 
-    throw new Error('dddd')
     const users = await User.findAll({ attributes: { exclude: ["password"] } });
     return users;
   }
