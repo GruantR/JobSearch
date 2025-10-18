@@ -90,9 +90,11 @@ const initializeDatabase = async () => {
 
     if (process.env.NODE_ENV === "development") {
       syncOptions.alter = true;
+      syncOptions.logging = false; // убираем логирование в консоли от синхронизации
       console.log("🔄 Режим разработки: включен auto-alter");
     } else {
       syncOptions.alter = false;
+      syncOptions.logging = false;// убираем логирование в консоли от синхронизации
       console.log("🔒 Production режим: отключен auto-alter");
     }
 
