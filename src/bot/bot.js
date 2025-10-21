@@ -1,3 +1,4 @@
+//bot/bot.js
 const TelegramBot = require('node-telegram-bot-api');
 const { botToken, webhookUrl } = require('./config');
 
