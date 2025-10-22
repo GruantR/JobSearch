@@ -30,6 +30,7 @@ class AuthService {
   }
 
   async authenticateUser(email, password) {
+    
     const user = await User.findOne({
       where: { email: email },
     });

@@ -1,6 +1,7 @@
 //bot/comand.js
 const bot = require("./bot");
 const authHandlers = require('./handlers/authHandlers');
+const userHandlers = require('./handlers/userHandlers');
 const SessionManager = require("./services/sessionManager");
 
 // Обработчик команды /start
@@ -29,6 +30,9 @@ bot.onText(/\/login/, (msg) => {
   authHandlers.handleLoginCommand(bot, msg);
 });
 
+bot.onText(/\/me/, (msg) => {
+  userHandlers.handleMeAndProfileComand(bot, msg);
+});
 
 // Обработчик команды /help
 bot.onText(/\/help/, (msg) => {
