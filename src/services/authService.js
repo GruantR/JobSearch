@@ -1,4 +1,4 @@
-//src/services/authServices.js
+//src/services/authService.js
 const { models } = require("../models/index");
 const { User, UserProfile } = models;
 const bcrypt = require("bcrypt");
