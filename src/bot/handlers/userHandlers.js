@@ -14,17 +14,28 @@ class userHandlers {
                 bot.sendMessage(chatId, '❌ Сначала войдите в систему через /login');
                 return;
             }
-            const session = await sessionManager.getSession(chatId);
+            const session = sessionManager.getSession(chatId);
             const userData = await UsersServices.getUserById(session.user.id);
-            
-            const userProfile = UserProfileService.getUserProfile(session.user.id)
-            bot.sendMessage(chatId, JSON.stringify(userData))
+            const userProfile = await UserProfileService.getUserProfile(session.user.id)
+            const message = this.formatUserInfo(userData,userProfile)
+            bot.sendMessage(chatId, message)
 
 
         } catch (error) {
             const message = handleBotError(error);
             bot.sendMessage(chatId, message);
         }
+    }
+
+    formatUserInfo (user, profile){
+        return `
+        👤 **Ваш профиль**
+
+        📧 Email: ${user.email}
+        👨‍💼 Имя: ${profile.fullName || 'Не указано'}
+        📞 Телефон: ${profile.phoneNumber || 'Не указано'}
+        📅 Зарегистрирован: ${user.createdAt.toLocaleDateString('ru-RU')}
+        `.trim();
     }
 }
 
