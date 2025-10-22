@@ -76,6 +76,8 @@ class SessionManager {
   }
 
   // Очистка попытки входа - "убираем карточку регистрации" 
+  // эта штука нужна когда ввел логин и пароль
+
   clearLoginAttempt(chatId) {
     // Удаляем попытку входа из хранилища
     this.loginAttempts.delete(chatId);

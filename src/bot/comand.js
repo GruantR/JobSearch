@@ -3,6 +3,7 @@ const bot = require("./bot");
 const authHandlers = require('./handlers/authHandlers');
 const userHandlers = require('./handlers/userHandlers');
 const SessionManager = require("./services/sessionManager");
+const vacancyHandlers = require('./handlers/vacancyHandlers');
 
 // Обработчик команды /start
 bot.onText(/\/start/, (msg) => {
@@ -30,8 +31,17 @@ bot.onText(/\/login/, (msg) => {
   authHandlers.handleLoginCommand(bot, msg);
 });
 
+// Обработчик команды /login
+bot.onText(/\/logout/, (msg) => {
+  authHandlers.handleLogoutCommand(bot, msg);
+});
+
 bot.onText(/\/me/, (msg) => {
   userHandlers.handleMeAndProfileComand(bot, msg);
+});
+
+bot.onText(/\/vacancies/, (msg) => {
+  vacancyHandlers.handleVacanciesCommand(bot, msg);
 });
 
 // Обработчик команды /help

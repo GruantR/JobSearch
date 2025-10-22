@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
+    "dev": "NODE_ENV=development nodemon src/server.js",
     "dev:win": "set NODE_ENV=development&& nodemon src/server.js",
     "prod": "cross-env NODE_ENV=production node src/server.js",
     "prod:win": "set NODE_ENV=production&& node src/server.js",
