@@ -1,6 +1,7 @@
 //src/bot/handlers/authHandlers.js
 const sessionManager = require('../services/sessionManager');
 const AuthService = require('../../services/authService');
+const { handleBotError } = require('../utils/errorHandler');
 
 class AuthHandlers {
   // Обработчик команды /login
@@ -31,7 +32,7 @@ class AuthHandlers {
 
       const attempt = sessionManager.getLoginAttempt(chatId);
   
-  // Проверяем что пользователь действительно в процессе логина
+  //Проверяем что пользователь действительно в процессе логина
   if (!attempt) {
     bot.sendMessage(chatId, '❌ Сначала используйте /login');
     return;
@@ -70,30 +71,23 @@ class AuthHandlers {
   }
 
     try{
-      const result = await AuthService.authenticateUser(attempt.email, password)
+      const result = await AuthService.authenticateUser(attempt.email, password) 
         sessionManager.createSession(chatId, result.user);
          bot.sendMessage(chatId, `✅ Вы вошли как ${result.user.email}`);
+         console.log(sessionManager.getSession(chatId));
+         
     }
     catch(error){
-    let message = '❌ Ошибка: ';
-    
-    if (error.name === 'AuthenticationError') {
-      message += 'Неверный email или пароль';
-    } else if (error.name === 'SequelizeValidationError') {
-      message += 'Некорректные данные';
-    } else {
-      message += 'Попробуйте позже';
-    }
-
-    bot.sendMessage(chatId, message);
-    sessionManager.clearLoginAttempt(chatId);
-    }
+   const message = handleBotError(error);
+      bot.sendMessage(chatId, message);
+      sessionManager.clearLoginAttempt(chatId);
 
     // TODO: Достать email из loginAttempt
     // TODO: Вызвать authService.authenticateUser(email, password)
     // TODO: Если успешно - создать сессию
     // TODO: Если ошибка - сообщить и очистить попытку
   }
+}
 }
 
 module.exports = new AuthHandlers();

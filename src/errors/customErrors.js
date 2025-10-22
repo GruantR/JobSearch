@@ -107,12 +107,6 @@ class StatusValidationError extends AppError {
   }
 }
 
-class StructuredValidationError extends ValidationError {
-  constructor(message = "Ошибка валидации данных", errors = []) {
-    super(message);
-    this.structuredErrors = errors; // Сохраняем структурированные ошибки
-  }
-}
 
 module.exports = {
   AppError,
