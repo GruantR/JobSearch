@@ -44,6 +44,12 @@ bot.onText(/\/vacancies/, (msg) => {
   vacancyHandlers.handleVacanciesCommand(bot, msg);
 });
 
+bot.onText(/\/vacancy (.+)/, (msg, match) => {
+  vacancyHandlers.handleVacancyCommand(bot, msg, match);
+});
+
+
+
 // Обработчик команды /help
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
@@ -88,6 +94,31 @@ bot.on('message', (msg)=>{
     );
   }
 })
+
+// Обработчик нажатий на inline кнопки
+bot.on('callback_query', (callbackQuery) => {
+  const msg = callbackQuery.message;
+  const chatId = msg.chat.id;
+  const data = callbackQuery.data;
+
+  // Обрабатываем нажатие на кнопку вакансии
+  if (data.startsWith('vacancy_')) {
+    const vacancyId = data.replace('vacancy_', '');
+    
+    // Имитируем команду /vacancy
+    const mockMsg = {
+      ...msg,
+      text: `/vacancy ${vacancyId}`
+    };
+    
+    vacancyHandlers.handleVacancyCommand(bot, mockMsg, { 
+      1: vacancyId 
+    });
+  }
+
+  // Подтверждаем нажатие кнопки
+  bot.answerCallbackQuery(callbackQuery.id);
+});
 
 console.log('✅ Команды бота зарегистрированы');
 
