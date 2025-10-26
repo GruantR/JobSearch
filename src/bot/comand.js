@@ -4,6 +4,7 @@ const authHandlers = require('./handlers/authHandlers');
 const userHandlers = require('./handlers/userHandlers');
 const SessionManager = require("./services/sessionManager");
 const vacancyHandlers = require('./handlers/vacancyHandlers');
+const VacanciesService = require('../services/vacanciesService');
 
 // Обработчик команды /start
 bot.onText(/\/start/, (msg) => {
@@ -11,7 +12,7 @@ bot.onText(/\/start/, (msg) => {
   const userName = msg.from.first_name;
   let message = `👋 Привет, ${userName}!\n\nЯ бот для управления вакансиями JobSearch.\n\n`;
   if (SessionManager.isAuthenticated(chatId)) {
-    const session = sessionManager.getSession(chatId);
+    const session = SessionManager.getSession(chatId);
     message += `✅ Вы вошли как: ${session.user.email}\n\n`;
     message += `Доступные команды:\n`;
     message += `/vacancies - ваши вакансии\n`;
@@ -65,7 +66,7 @@ bot.onText(/\/help/, (msg) => {
   );
 });
 
-
+// 📋 ОБРАБОТКА ОБЫЧНЫХ СООБЩЕНИЙ (не команд)
 bot.on('message', (msg)=>{
   const chatId = msg.chat.id;
   const text = msg.text;
@@ -95,30 +96,79 @@ bot.on('message', (msg)=>{
   }
 })
 
+///////////////////////////////////////
 // Обработчик нажатий на inline кнопки
-bot.on('callback_query', (callbackQuery) => {
+/*
+Пользователь: Нажимает кнопку
+↓
+Telegram: Отправляет callback_query с данными "vacancy_123"
+↓
+Бот: Извлекает ID вакансии (123)
+↓
+Бот: Создает mockMsg с текстом "/vacancy 123"
+↓
+Бот: Вызывает handleVacancyCommand как будто пользователь ввел команду
+↓
+Бот: Показывает детали вакансии 123
+*/
+// bot/comand.js - УПРОЩЕННЫЙ обработчик callback_query
+bot.on('callback_query', async (callbackQuery) => {
   const msg = callbackQuery.message;
   const chatId = msg.chat.id;
-  const data = callbackQuery.data;
+  const data = callbackQuery.data; // 📍 Это данные с кнопки: "vacancy_123", "set_status_456_applied" и т.д.
 
-  // Обрабатываем нажатие на кнопку вакансии
-  if (data.startsWith('vacancy_')) {
-    const vacancyId = data.replace('vacancy_', '');
-    
-    // Имитируем команду /vacancy
-    const mockMsg = {
-      ...msg,
-      text: `/vacancy ${vacancyId}`
-    };
-    
-    vacancyHandlers.handleVacancyCommand(bot, mockMsg, { 
-      1: vacancyId 
-    });
+  try {
+    // 1. Если нажали "Подробнее" о вакансии
+    if (data.startsWith('vacancy_')) {
+      const vacancyId = data.replace('vacancy_', ''); // 📍 Извлекаем ID: из "vacancy_123" получаем "123"
+      const mockMsg = {
+        ...msg,
+        text: `/vacancy ${vacancyId}` //📍 Создаем фейковую команду как будто пользователь написал /vacancy 123
+      };
+      await vacancyHandlers.handleVacancyCommand(bot, mockMsg, { 
+        1: vacancyId // 📍 Передаем ID как параметр команды
+      });
+    }
+
+    // 2. Если нажали "Изменить статус"
+    else if (data.startsWith('show_status_menu_')) {
+      const vacancyId = data.replace('show_status_menu_', '');
+      await vacancyHandlers.showStatusMenu(bot, chatId, vacancyId, msg.message_id);
+    }
+
+    // 3. Если выбрали конкретный статус (например: "set_status_123_applied")
+    else if (data.startsWith('set_status_')) {
+      const parts = data.split('_'); // 📍 Разбиваем "set_status_123_applied" на части: ["set", "status", "123", "applied"]
+      const vacancyId = parts[2]; // 📍 Третья часть - ID вакансии: "123"
+      const newStatus = parts[3]; // 📍 Четвертая часть - новый статус: "applied"
+      
+      await vacancyHandlers.handleStatusChange(bot, chatId, vacancyId, newStatus, msg.message_id);
+    }
+
+    // 4. Если нажали "Отмена" - возвращаемся к просмотру вакансии
+    else if (data.startsWith('cancel_')) {
+      const vacancyId = data.replace('cancel_', '');
+      const session = SessionManager.getSession(chatId);
+      const vacancy = await VacanciesService.getVacancy(parseInt(vacancyId), session.user.id);
+      const message = vacancyHandlers.formatVacancyDetails(vacancy);
+       // 📍 Редактируем существующее сообщение (меняем меню статусов на детали вакансии)
+      await bot.editMessageText(message, {
+        chat_id: chatId,
+        message_id: msg.message_id,
+        parse_mode: 'Markdown'
+      });
+    }
+// ✅ Подтверждаем нажатие кнопки (убираем "часики" в Telegram)
+    bot.answerCallbackQuery(callbackQuery.id);
+
+  } catch(error) {
+    // 🔥 ПРОСТАЯ ОБРАБОТКА ОШИБОК - только самое необходимое
+    console.error('Ошибка в callback_query:', error);
+    bot.sendMessage(chatId, '❌ Произошла ошибка при обработке действия');
+    bot.answerCallbackQuery(callbackQuery.id);
   }
-
-  // Подтверждаем нажатие кнопки
-  bot.answerCallbackQuery(callbackQuery.id);
 });
+
 
 console.log('✅ Команды бота зарегистрированы');
 
