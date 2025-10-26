@@ -1,3 +1,5 @@
+//src/bot/utils/errorHandler.js
+
 const {
     AuthenticationError,
     ForbiddenError,
@@ -9,32 +11,32 @@ const {
 } = require('../../errors/customErrors');
 
 function handleBotError(error) {
+    console.error('Ошибка в боте:', error);
+
+    // 🔥 ПРОСТАЯ И ПОНЯТНАЯ ОБРАБОТКА:
+    
+    // 1. Ошибки авторизации
     if (error instanceof AuthenticationError) {
         return '🔐 Неверный email или пароль';
     }
 
+    // 2. Ошибки валидации статуса (самые частые)
+    if (error instanceof StatusValidationError) {
+        return `❌ ${error.message}`; // Показываем сообщение как есть
+    }
+
+    // 3. Ресурс не найден
     if (error instanceof NotFoundError) {
         return '❌ Ресурс не найден';
     }
 
+    // 4. Другие ошибки валидации
     if (error instanceof ValidationError) {
         return '❌ Некорректные данные';
     }
 
-    if (error instanceof ConflictError) {
-        return '❌ Такой пользователь уже существует';
-    }
-
-    if (error instanceof BadRequestError) {
-        return '❌ Некорректный запрос';
-    }
-
-    if (error instanceof StatusValidationError) {
-        return '❌ Недопустимое изменение статуса';
-    }
-
-    console.error('Необработанная ошибка в боте:', error);
-    return '❌ Произошла непредвиденная ошибка. Попробуйте позже.';
+    // 5. Все остальные ошибки
+    return '❌ Произошла ошибка. Попробуйте еще раз';
 }
 
 module.exports = {handleBotError};
