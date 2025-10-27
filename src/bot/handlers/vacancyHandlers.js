@@ -57,6 +57,7 @@ class VacancyHandlers {
         inline_keyboard: [
           [
             { text: "📋 Подробнее", callback_data: `vacancy_${vacancy.id}` },
+            { text: "✏️ Редактировать", callback_data: `edit_${vacancy.id}` },
             { text: "🔄 Статус", callback_data: `show_status_menu_${vacancy.id}` },
           ],
         ],
@@ -193,6 +194,98 @@ class VacancyHandlers {
     }
   }
 
+showEditMenu(bot, chatId, vacancyId) {
+  const keyboard = {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: "🏢 Компания", callback_data: `edit_company` },
+          { text: "💼 Должность", callback_data: `edit_jobTitle` }
+        ],
+        [
+          { text: "💰 Зарплата", callback_data: `edit_salary` },
+          { text: "📝 Описание", callback_data: `edit_description` }
+        ],
+        [
+          { text: "🌐 Платформа", callback_data: `edit_sourcePlatform` },
+          { text: "🔗 Ссылка", callback_data: `edit_source_url` }
+        ],
+        [
+          { text: "📋 Заметки", callback_data: `edit_notes` },
+          { text: "❌ Отмена", callback_data: `cancel_edit_${vacancyId}` }
+        ]
+      ]
+    }
+  };
+
+  bot.sendMessage(chatId, "Что хотите изменить?", keyboard);
+}
+
+// Обработчик открытия меню редактирования
+ handleEditVacancy(bot, chatId, vacancyId) {
+  // Сохраняем в сессии vacancyId и состояние
+  const session = sessionManager.getSession(chatId);
+  session.editingVacancy = {
+    vacancyId: vacancyId,
+    step: 'menu' // этап - показ меню
+  };
+  
+  this.showEditMenu(bot, chatId, vacancyId);
+}
+
+// Обработчик выбора поля для редактирования
+async handleFieldSelection(bot, chatId, field) {
+try {
+    const session = sessionManager.getSession(chatId);
+    
+    if (session.editingVacancy) {
+      // Получаем текущие данные вакансии
+      const vacancy = await VacanciesService.getVacancy(
+        session.editingVacancy.vacancyId, 
+        session.user.id
+      );
+      
+      // Получаем текущее значение поля
+       const currentValues = {
+        company: vacancy.companyName,
+        jobTitle: vacancy.jobTitle,
+        salary: vacancy.salary,
+        description: vacancy.description,
+        sourcePlatform: vacancy.sourcePlatform,
+        source_url: vacancy.source_url,
+        notes: vacancy.notes
+      };
+
+      const currentValue = currentValues[field] || 'не указано';
+      
+      // Обновляем состояние - пользователь выбрал поле
+      session.editingVacancy.field = field;
+      session.editingVacancy.step = 'awaiting_input';
+      
+      // Запрашиваем новое значение, показывая текущее
+        const fieldNames = {
+        company: 'название компании',
+        jobTitle: 'должность',
+        salary: 'зарплату',
+        description: 'описание',
+        sourcePlatform: 'платформу',
+        source_url: 'ссылку',
+        notes: 'заметки'
+      };
+      
+      const message = `📝 Редактирование ${fieldNames[field]}\n\n` +
+                     `Текущее значение: *${currentValue}*\n\n` +
+                     `Введите новое ${fieldNames[field]}:`;
+      
+      bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    }
+  } catch (error) {
+    const message = handleBotError(error);
+    bot.sendMessage(chatId, `❌ Ошибка: ${message}`);
+  }
+}
+
+  
   // 🎯 ФОРМАТИРОВАНИЕ ДЕТАЛЕЙ ВАКАНСИИ
   formatVacancyDetails(vacancy) {
     const emoji = this.statusEmojis[vacancy.status] || "📄";

@@ -1,3 +1,4 @@
+//src/bot/services/sessionManager.js
 class SessionManager {
   constructor() {
     // Создаём хранилище для сессий (ключ: chatId, значение: данные пользователя)

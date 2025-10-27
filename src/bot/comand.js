@@ -5,6 +5,7 @@ const userHandlers = require('./handlers/userHandlers');
 const SessionManager = require("./services/sessionManager");
 const vacancyHandlers = require('./handlers/vacancyHandlers');
 const VacanciesService = require('../services/vacanciesService');
+const { handleBotError } = require("../bot/utils/errorHandler");
 
 // Обработчик команды /start
 bot.onText(/\/start/, (msg) => {
@@ -67,7 +68,7 @@ bot.onText(/\/help/, (msg) => {
 });
 
 // 📋 ОБРАБОТКА ОБЫЧНЫХ СООБЩЕНИЙ (не команд)
-bot.on('message', (msg)=>{
+bot.on('message', async (msg)=>{
   const chatId = msg.chat.id;
   const text = msg.text;
 
@@ -94,6 +95,33 @@ bot.on('message', (msg)=>{
       '🤔 Я пока понимаю только команды. Напиши /help чтобы узнать что я умею!'
     );
   }
+
+  const session = SessionManager.getSession(chatId);
+if (session && session.editingVacancy && session.editingVacancy.step === 'awaiting_input') {
+  try {
+    const { vacancyId, field } = session.editingVacancy;
+    
+    // Создаем объект с обновляемыми данными
+    const updateData = { [field]: text };
+    
+    // Используем существующий метод обновления вакансии
+    await VacanciesService.updateVacancy(vacancyId, session.user.id, updateData);
+    
+    // Показываем успех
+    bot.sendMessage(chatId, "✅ Изменения сохранены!");
+    
+    // Возвращаем в меню редактирования
+    session.editingVacancy.step = 'menu';
+    delete session.editingVacancy.field;
+    
+    vacancyHandlers.showEditMenu(bot, chatId, vacancyId);
+    
+  } catch (error) {
+    const message = handleBotError(error);
+    bot.sendMessage(chatId, `❌ Ошибка: ${message}`);
+  }
+  return;
+}
 })
 
 ///////////////////////////////////////
@@ -158,6 +186,44 @@ bot.on('callback_query', async (callbackQuery) => {
         parse_mode: 'Markdown'
       });
     }
+
+
+   if (data === 'edit_company') {
+    vacancyHandlers.handleFieldSelection(bot, chatId, 'company');
+    bot.answerCallbackQuery(callbackQuery.id);
+  }
+  else if (data === 'edit_jobTitle') {
+    vacancyHandlers.handleFieldSelection(bot, chatId, 'jobTitle');
+    bot.answerCallbackQuery(callbackQuery.id);
+  }
+  else if (data === 'edit_salary') {
+  vacancyHandlers.handleFieldSelection(bot, chatId, 'salary');
+  bot.answerCallbackQuery(callbackQuery.id);
+}
+else if (data === 'edit_description') {
+  vacancyHandlers.handleFieldSelection(bot, chatId, 'description');
+  bot.answerCallbackQuery(callbackQuery.id);
+}
+else if (data === 'edit_sourcePlatform') {
+  vacancyHandlers.handleFieldSelection(bot, chatId, 'sourcePlatform');
+  bot.answerCallbackQuery(callbackQuery.id);
+}
+else if (data === 'edit_source_url') {
+  vacancyHandlers.handleFieldSelection(bot, chatId, 'source_url');
+  bot.answerCallbackQuery(callbackQuery.id);
+}
+else if (data === 'edit_notes') {
+  vacancyHandlers.handleFieldSelection(bot, chatId, 'notes');
+  bot.answerCallbackQuery(callbackQuery.id);
+}
+else if (data.startsWith('edit_')) {
+    const vacancyId = data.split('_')[1];
+    vacancyHandlers.handleEditVacancy(bot, chatId, vacancyId);
+    bot.answerCallbackQuery(callbackQuery.id);
+  }
+
+
+
 // ✅ Подтверждаем нажатие кнопки (убираем "часики" в Telegram)
     bot.answerCallbackQuery(callbackQuery.id);
 
