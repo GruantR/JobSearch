@@ -1,4 +1,13 @@
 //bot/comand.js
+/* значт смотри сутулый пес
+bot.on (message) - это бработчик текста. 
+msg - это объект -который нам присылает телега когда кто-то что-то отправил. Мы з него вытягиваем данные и работаем с ними
+const text = msg.text - это то что отправил пользователь, его текст
+const chatId = msg.chat.id - он постоянный
+
+Чтобы боту что-то отправить, используем команду bot.sendMessage(chatId, `первый параметр чат куда отпраить, а этот параметр что мы хотим отправить ему`)
+
+*/
 const bot = require("./bot");
 const authHandlers = require('./handlers/authHandlers');
 const userHandlers = require('./handlers/userHandlers');
@@ -7,11 +16,18 @@ const vacancyHandlers = require('./handlers/vacancyHandlers');
 const VacanciesService = require('../services/vacanciesService');
 const { handleBotError } = require("../bot/utils/errorHandler");
 
+bot.setMyCommands([
+  {command: '/start', description: "Начальное приветствие"},
+  {command: '/login', description: "Вход в систему"},
+  {command: '/game', description: "Рубануть в игрульку под пивко"},
+])
+
 // Обработчик команды /start
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
   const userName = msg.from.first_name;
   let message = `👋 Привет, ${userName}!\n\nЯ бот для управления вакансиями JobSearch.\n\n`;
+  await bot.sendPhoto(chatId, 'https://tlgrm.ru/_/stickers/1b5/0ab/1b50abf8-8451-40ca-be37-ffd7aa74ec4d/50.jpg')
   if (SessionManager.isAuthenticated(chatId)) {
     const session = SessionManager.getSession(chatId);
     message += `✅ Вы вошли как: ${session.user.email}\n\n`;
@@ -25,7 +41,7 @@ bot.onText(/\/start/, (msg) => {
     message += `/login - войти в систему`;
   }
 
-  bot.sendMessage(chatId, message);
+  await bot.sendMessage(chatId, message);
 });
 
 // Обработчик команды /login
@@ -69,32 +85,37 @@ bot.onText(/\/help/, (msg) => {
 
 // 📋 ОБРАБОТКА ОБЫЧНЫХ СООБЩЕНИЙ (не команд)
 bot.on('message', async (msg)=>{
+  
+  
   const chatId = msg.chat.id;
   const text = msg.text;
 
-  // Игнорируем служебные сообщения
+  try {
+// 🚫 1. Игнорируем сообщения без текста (фото, стикеры и т.д.)
   if (!text) return;
 
-    // Пропускаем команды (они начинаются с /)
+    // 🚫 2. Игнорируем команды (они обрабатываются в других обработчиках)
   if (text.startsWith('/')) return;
 
    // Проверяем, находится ли пользователь в процессе логина
   const loginAttempt = SessionManager.getLoginAttempt(chatId);
     if (loginAttempt) {
-    if (loginAttempt.step === 'email') {
-      // Пользователь вводит email
-      authHandlers.handleEmailInput(bot, msg);
-    } else if (loginAttempt.step === 'password') {
-      // Пользователь вводит пароль
-      authHandlers.handlePasswordInput(bot, msg);
+      try{
+       if (loginAttempt.step === 'email') {
+           authHandlers.handleEmailInput(bot, msg);
+        } else if (loginAttempt.step === 'password') {
+          await authHandlers.handlePasswordInput(bot, msg);
+        }
+        return
+      }catch(error){
+         console.error('Ошибка в процессе логина:', error);
+        const message = handleBotError(error);
+        bot.sendMessage(chatId, `❌ Ошибка при входе: ${message}`);
+        return;
+      }
     }
-  } else {
-    // Обычное сообщение (не команда и не процесс логина)
-    bot.sendMessage(
-      chatId,
-      '🤔 Я пока понимаю только команды. Напиши /help чтобы узнать что я умею!'
-    );
-  }
+  
+
 
   const session = SessionManager.getSession(chatId);
 if (session && session.editingVacancy && session.editingVacancy.step === 'awaiting_input') {
@@ -115,13 +136,28 @@ if (session && session.editingVacancy && session.editingVacancy.step === 'awaiti
     delete session.editingVacancy.field;
     
     vacancyHandlers.showEditMenu(bot, chatId, vacancyId);
+    return
     
   } catch (error) {
     const message = handleBotError(error);
     bot.sendMessage(chatId, `❌ Ошибка: ${message}`);
+    return
   }
-  return;
 }
+    bot.sendMessage(
+      chatId,
+      '🤔 Я пока понимаю только команды. Напиши /help чтобы узнать что я умею!'
+    );
+
+  }catch(error){
+     console.error('Непредвиденная ошибка в обработчике сообщений:', error);
+    bot.sendMessage(chatId, '❌ Произошла непредвиденная ошибка. Попробуйте еще раз.');
+  }
+
+
+
+
+
 })
 
 ///////////////////////////////////////
