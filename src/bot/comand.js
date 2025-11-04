@@ -1,6 +1,6 @@
 //bot/comand.js
 /* значт смотри сутулый пес
-bot.on (message) - это бработчик текста. 
+bot.on (message) - это обработчик текста. 
 msg - это объект -который нам присылает телега когда кто-то что-то отправил. Мы з него вытягиваем данные и работаем с ними
 const text = msg.text - это то что отправил пользователь, его текст
 const chatId = msg.chat.id - он постоянный
@@ -59,10 +59,12 @@ bot.onText(/\/me/, (msg) => {
 });
 
 bot.onText(/\/vacancies/, (msg) => {
-  vacancyHandlers.handleVacanciesCommand(bot, msg);
+  vacancyHandlers.handleVacanciesCommand(msg);
 });
 
 bot.onText(/\/vacancy (.+)/, (msg, match) => {
+  console.log(match);
+  
   vacancyHandlers.handleVacancyCommand(bot, msg, match);
 });
 
@@ -82,6 +84,58 @@ bot.onText(/\/help/, (msg) => {
     { parse_mode: 'Markdown' }
   );
 });
+
+/////////////////////////////////GAME/////////////////////////////////
+
+async function newGame (chatId) {
+  await bot.sendMessage(chatId, 'Сейчас я загадаю цифру от 0 до 9, попробуй отгадать!');
+  const randomNumber = Math.floor(Math.random()*10);
+  randomGameNumber.chatId = randomNumber
+await bot.sendMessage(chatId, 'Отгадывай', keyboardGame)
+};
+
+const keyboardGame = {
+  reply_markup: {
+    inline_keyboard: [
+        [
+          { text: "1", callback_data: `game_keyboard_1` },
+          { text: "2", callback_data: `game_keyboard_2` },
+          { text: "3", callback_data: `game_keyboard_3` }
+        ],
+        [
+          { text: "4", callback_data: `game_keyboard_4` },
+          { text: "5", callback_data: `game_keyboard_5` },
+          { text: "6", callback_data: `game_keyboard_6` }
+        ],
+        [
+          { text: "7", callback_data: `game_keyboard_7` },
+          { text: "8", callback_data: `game_keyboard_8` },
+          { text: "9", callback_data: `game_keyboard_9` }
+        ],
+        [{ text: "0", callback_data: `game_keyboard_0` }]
+    ]
+  }
+}
+
+const againGame = {
+  reply_markup: {
+    inline_keyboard: [
+        [
+          { text: "Начать заново", callback_data: '/again' },
+        ]
+    ]
+  }
+}
+
+const randomGameNumber = {};
+
+
+bot.onText(/\/game/, async (msg) => {
+  const chatId = msg.chat.id;
+    return await newGame(chatId);
+
+})
+
 
 // 📋 ОБРАБОТКА ОБЫЧНЫХ СООБЩЕНИЙ (не команд)
 bot.on('message', async (msg)=>{
@@ -114,36 +168,14 @@ bot.on('message', async (msg)=>{
         return;
       }
     }
-  
 
+// ПРОВЕРЯЕМ - находится ли пользователь в процессе редактирования
+const session = SessionManager.getSession(chatId);
+    if (session && session.editingVacancy && session.editingVacancy.step === 'awaiting_input'){
+      await vacancyHandlers.start2EditVacancyField(chatId, text, session)
+      return;
+    }
 
-  const session = SessionManager.getSession(chatId);
-if (session && session.editingVacancy && session.editingVacancy.step === 'awaiting_input') {
-  try {
-    const { vacancyId, field } = session.editingVacancy;
-    
-    // Создаем объект с обновляемыми данными
-    const updateData = { [field]: text };
-    
-    // Используем существующий метод обновления вакансии
-    await VacanciesService.updateVacancy(vacancyId, session.user.id, updateData);
-    
-    // Показываем успех
-    bot.sendMessage(chatId, "✅ Изменения сохранены!");
-    
-    // Возвращаем в меню редактирования
-    session.editingVacancy.step = 'menu';
-    delete session.editingVacancy.field;
-    
-    vacancyHandlers.showEditMenu(bot, chatId, vacancyId);
-    return
-    
-  } catch (error) {
-    const message = handleBotError(error);
-    bot.sendMessage(chatId, `❌ Ошибка: ${message}`);
-    return
-  }
-}
     bot.sendMessage(
       chatId,
       '🤔 Я пока понимаю только команды. Напиши /help чтобы узнать что я умею!'
@@ -181,6 +213,7 @@ bot.on('callback_query', async (callbackQuery) => {
   const chatId = msg.chat.id;
   const data = callbackQuery.data; // 📍 Это данные с кнопки: "vacancy_123", "set_status_456_applied" и т.д.
 
+
   try {
     // 1. Если нажали "Подробнее" о вакансии
     if (data.startsWith('vacancy_')) {
@@ -197,7 +230,7 @@ bot.on('callback_query', async (callbackQuery) => {
     // 2. Если нажали "Изменить статус"
     else if (data.startsWith('show_status_menu_')) {
       const vacancyId = data.replace('show_status_menu_', '');
-      await vacancyHandlers.showStatusMenu(bot, chatId, vacancyId, msg.message_id);
+      await vacancyHandlers.showStatusMenu(chatId, vacancyId, msg.message_id);
     }
 
     // 3. Если выбрали конкретный статус (например: "set_status_123_applied")
@@ -224,39 +257,71 @@ bot.on('callback_query', async (callbackQuery) => {
     }
 
 
-   if (data === 'edit_company') {
-    vacancyHandlers.handleFieldSelection(bot, chatId, 'company');
-    bot.answerCallbackQuery(callbackQuery.id);
+
+
+
+
+    //////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
+    ///разрабатывай это....
+  if (data.startsWith('editVacancy_')) {
+     const vacancyId = data.split('_')[1]
+      vacancyHandlers.showEditMenu(chatId, vacancyId)
   }
-  else if (data === 'edit_jobTitle') {
-    vacancyHandlers.handleFieldSelection(bot, chatId, 'jobTitle');
-    bot.answerCallbackQuery(callbackQuery.id);
+    if (data.startsWith('editDataVacancy_')) {
+      const parts = data.split('_');
+      const vacancyId = parts[1];
+      const editModule = parts[2];
+      await vacancyHandlers.startEditVacancyField(chatId,vacancyId,editModule)
+      console.log(data);
+      bot.sendMessage(chatId, 'Введите новое значение');
+      
+      
+
+      
   }
-  else if (data === 'edit_salary') {
-  vacancyHandlers.handleFieldSelection(bot, chatId, 'salary');
-  bot.answerCallbackQuery(callbackQuery.id);
-}
-else if (data === 'edit_description') {
-  vacancyHandlers.handleFieldSelection(bot, chatId, 'description');
-  bot.answerCallbackQuery(callbackQuery.id);
-}
-else if (data === 'edit_sourcePlatform') {
-  vacancyHandlers.handleFieldSelection(bot, chatId, 'sourcePlatform');
-  bot.answerCallbackQuery(callbackQuery.id);
-}
-else if (data === 'edit_source_url') {
-  vacancyHandlers.handleFieldSelection(bot, chatId, 'source_url');
-  bot.answerCallbackQuery(callbackQuery.id);
-}
-else if (data === 'edit_notes') {
-  vacancyHandlers.handleFieldSelection(bot, chatId, 'notes');
-  bot.answerCallbackQuery(callbackQuery.id);
-}
-else if (data.startsWith('edit_')) {
-    const vacancyId = data.split('_')[1];
-    vacancyHandlers.handleEditVacancy(bot, chatId, vacancyId);
-    bot.answerCallbackQuery(callbackQuery.id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  if (data === '/again') {
+    await newGame(chatId)
   }
+
+ if (data.startsWith('game_keyboard')) {
+  const idKeyboard =  Number(data.split('_')[2])
+  await bot.sendMessage(chatId, `Ты выбрал кнопку ${idKeyboard}`);  
+if (idKeyboard === randomGameNumber.chatId) {
+    return await bot.sendMessage(chatId, `Ты угадал, ты крут`, againGame);
+}
+else {
+  return await bot.sendMessage(chatId, `Не угадаль, число правильное ${randomGameNumber.chatId}`, againGame);
+}
+
+ }
+
+
 
 
 
