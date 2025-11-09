@@ -13,7 +13,22 @@ const {
 function handleBotError(error) {
     console.error('Ошибка в боте:', error);
 
-    // 🔥 ПРОСТАЯ И ПОНЯТНАЯ ОБРАБОТКА:
+    // 1. Ошибки валидации Sequelize
+    if (error.name === 'SequelizeValidationError') {
+        const messages = error.errors.map(err => `• ${err.message}`).join('\n');
+        return `❌ Ошибка в данных:\n${messages}`;
+    }
+
+    // 2. Ошибки уникальности Sequelize  
+    if (error.name === 'SequelizeUniqueConstraintError') {
+        return '❌ Такие данные уже существуют';
+    }
+
+    // 3. Ошибки базы данных Sequelize
+    if (error.name === 'SequelizeDatabaseError') {
+        return '❌ Ошибка базы данных';
+    }
+
     
     // 1. Ошибки авторизации
     if (error instanceof AuthenticationError) {

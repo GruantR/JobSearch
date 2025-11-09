@@ -73,16 +73,33 @@ bot.onText(/\/vacancy (.+)/, (msg, match) => {
 // Обработчик команды /help
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
+  const isAuthenticated = SessionManager.isAuthenticated(chatId);
 
-  bot.sendMessage(
-    chatId,
-    `📚 **Доступные команды:**\n\n` +
-    `/start - начать работу\n` +
-    `/help - эта справка\n` +
-    `/login - войти в систему\n` +
-    `🚀 _Развиваем бота дальше..._`,
-    { parse_mode: 'Markdown' }
-  );
+  let message = `🤖 **JobSearch Bot - Справка по командам**\n\n`;
+
+  if (isAuthenticated) {
+    const session = SessionManager.getSession(chatId);
+    message += `✅ **Авторизован как:** ${session.user.email}\n\n`;
+    
+    message += `👨‍💼 **Работа с вакансиями:**\n`;
+    message += `├ /vacancies - Ваши вакансии\n`;
+    message += `├ /me - Профиль\n`;
+    message += `└ /logout - Выйти\n\n`;
+    
+    message += `🎮 **Развлечения:**\n`;
+    message += `├ /game - Мини-игра\n`;
+    message += `└ /help - Справка\n`;
+  } else {
+    message += `🔐 **Для начала работы:**\n`;
+    message += `├ /start - Начать работу\n`;
+    message += `├ /login - Войти в систему\n`;
+    message += `├ /game - Мини-игра\n`;
+    message += `└ /help - Справка\n\n`;
+    
+    message += `_После авторизации откроются команды для управления вакансиями_`;
+  }
+
+  bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
 });
 
 /////////////////////////////////GAME/////////////////////////////////
@@ -217,14 +234,9 @@ bot.on('callback_query', async (callbackQuery) => {
   try {
     // 1. Если нажали "Подробнее" о вакансии
     if (data.startsWith('vacancy_')) {
-      const vacancyId = data.replace('vacancy_', ''); // 📍 Извлекаем ID: из "vacancy_123" получаем "123"
-      const mockMsg = {
-        ...msg,
-        text: `/vacancy ${vacancyId}` //📍 Создаем фейковую команду как будто пользователь написал /vacancy 123
-      };
-      await vacancyHandlers.handleVacancyCommand(bot, mockMsg, { 
-        1: vacancyId // 📍 Передаем ID как параметр команды
-      });
+       const parts = data.split('_');
+      const vacancyId = parts[1]
+      await vacancyHandlers.handleVacancyCommand(chatId, vacancyId)
     }
 
     // 2. Если нажали "Изменить статус"
@@ -235,54 +247,47 @@ bot.on('callback_query', async (callbackQuery) => {
 
     // 3. Если выбрали конкретный статус (например: "set_status_123_applied")
     else if (data.startsWith('set_status_')) {
-      const parts = data.split('_'); // 📍 Разбиваем "set_status_123_applied" на части: ["set", "status", "123", "applied"]
-      const vacancyId = parts[2]; // 📍 Третья часть - ID вакансии: "123"
-      const newStatus = parts[3]; // 📍 Четвертая часть - новый статус: "applied"
-      
+      const parts = data.split('_');
+      const vacancyId = parts[2]; 
+      const newStatus = parts[3]; 
       await vacancyHandlers.handleStatusChange(bot, chatId, vacancyId, newStatus, msg.message_id);
     }
 
-    // 4. Если нажали "Отмена" - возвращаемся к просмотру вакансии
-    else if (data.startsWith('cancel_')) {
-      const vacancyId = data.replace('cancel_', '');
-      const session = SessionManager.getSession(chatId);
-      const vacancy = await VacanciesService.getVacancy(parseInt(vacancyId), session.user.id);
-      const message = vacancyHandlers.formatVacancyDetails(vacancy);
-       // 📍 Редактируем существующее сообщение (меняем меню статусов на детали вакансии)
-      await bot.editMessageText(message, {
-        chat_id: chatId,
-        message_id: msg.message_id,
-        parse_mode: 'Markdown'
-      });
-    }
 
-
-
-
-
-
-    //////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////
-    ///разрабатывай это....
+// все что касаемо редактрования
   if (data.startsWith('editVacancy_')) {
      const vacancyId = data.split('_')[1]
-      vacancyHandlers.showEditMenu(chatId, vacancyId)
+     await vacancyHandlers.handleVacancyCommand(chatId,vacancyId);
+     vacancyHandlers.showEditMenu(chatId, vacancyId);
   }
-    if (data.startsWith('editDataVacancy_')) {
+
+
+  if (data.startsWith('editDataVacancy_')) {
       const parts = data.split('_');
       const vacancyId = parts[1];
       const editModule = parts[2];
       await vacancyHandlers.startEditVacancyField(chatId,vacancyId,editModule)
-      console.log(data);
-      bot.sendMessage(chatId, 'Введите новое значение');
-      
-      
-
-      
+      bot.sendMessage(chatId, 'Введите новое значение');   
   }
 
+  // Кнопка отмены введения новых данных любого из полей редактрования вакансии - переход меню выбора полей для редактрования
+  if (data.startsWith('cancel_editDataVacancy_')){
+    const parts = data.split('_');
+    const vacancyId = parts[2];
+    await vacancyHandlers.handleVacancyCommand(chatId,vacancyId);
+    vacancyHandlers.showEditMenu(chatId, vacancyId);
+  }
 
-
+  // Кнопка отмены выбора полей для редактирования вакансий - переход в подробное описание вакансии
+    if (data.startsWith('cancel_editVacancy_')){
+          const parts = data.split('_');
+      const vacancyId = parts[2];
+      await vacancyHandlers.handleVacancyCommand(chatId, vacancyId)
+  }
+// Кнопка - показать все вакансии
+  if (data === 'getVacancies'){
+    await vacancyHandlers.handleVacanciesCommand(msg)
+  }
 
 
 
@@ -313,9 +318,11 @@ bot.on('callback_query', async (callbackQuery) => {
   const idKeyboard =  Number(data.split('_')[2])
   await bot.sendMessage(chatId, `Ты выбрал кнопку ${idKeyboard}`);  
 if (idKeyboard === randomGameNumber.chatId) {
+  await bot.sendPhoto(chatId, 'https://cdn27.echosevera.ru/64809353eac9120dd845a103/6484502b61cba.jpg')
     return await bot.sendMessage(chatId, `Ты угадал, ты крут`, againGame);
 }
 else {
+  await bot.sendPhoto(chatId, 'https://cs.pikabu.ru/img_n/2012-10_3/53z.jpg')
   return await bot.sendMessage(chatId, `Не угадаль, число правильное ${randomGameNumber.chatId}`, againGame);
 }
 

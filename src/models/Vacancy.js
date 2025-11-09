@@ -68,7 +68,7 @@ const Vacancy = sequelize.define(
         },
       },
     },
-    source_url: {
+    sourceUrl: {
       type: DataTypes.STRING,
       validate: {
         isUrl: {
