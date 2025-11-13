@@ -107,6 +107,14 @@ class StatusValidationError extends AppError {
   }
 }
 
+class StructuredValidationError extends AppError {
+  constructor(message, errors) {
+    super(message, 400);
+    this.errors = errors; // Массив объектов с полями field, message, value
+  }
+}
+
+
 
 module.exports = {
   AppError,
@@ -117,4 +125,5 @@ module.exports = {
   ConflictError,
   BadRequestError,
   StatusValidationError,
+  StructuredValidationError,
 };

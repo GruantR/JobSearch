@@ -5,7 +5,6 @@ const bot = require("../bot");
 const { handleBotError } = require("../utils/errorHandler");
 
 class VacancyHandlers {
-  // 📊 Эмодзи для статусов - просто справочник
   get statusEmojis() {
     return {
       found: "🔍 Найдена вакансия",
@@ -18,8 +17,6 @@ class VacancyHandlers {
     };
   }
 
-  //////////////////////////////////// 📋 КОМАНДА /VACANCIES - ПОКАЗАТЬ ВАКАНСИИ
-  //////////////////////////////////////////////////////
   async handleVacanciesCommand(msg) {
     const chatId = msg.chat.id;
     try {
@@ -35,27 +32,17 @@ class VacancyHandlers {
         bot.sendMessage(chatId, "📭 У вас пока нет вакансий.");
         return;
       }
- 
+
       vacancies.forEach((vacancy) => {
         const emoji = this.statusEmojis[vacancy.status] || "📄";
-        const message = `${emoji} **${
-          vacancy.jobTitle || "Без названия"
-        }**\n🏢 ${vacancy.companyName}\n💰 ${
-          vacancy.salary || "З/П не указана"
-        }`;
+        const message = `${emoji} **${vacancy.jobTitle || "Без названия"}**\n🏢 ${vacancy.companyName}\n💰 ${vacancy.salary || "З/П не указана"}`;
 
         const keyboard = {
           inline_keyboard: [
             [
               { text: "📋 Подробнее", callback_data: `vacancy_${vacancy.id}` },
-              {
-                text: "✏️ Редактировать",
-                callback_data: `editVacancy_${vacancy.id}`,
-              },
-              {
-                text: "🔄 Статус",
-                callback_data: `show_status_menu_${vacancy.id}`,
-              },
+              { text: "✏️ Редактировать", callback_data: `editVacancy_${vacancy.id}` },
+              { text: "🔄 Статус", callback_data: `show_status_menu_${vacancy.id}` },
             ],
           ],
         };
@@ -66,77 +53,43 @@ class VacancyHandlers {
         });
       });
     } catch (error) {
-      const message = handleBotError(error);
-      bot.sendMessage(chatId, message);
+      bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
-  //////////////////////////////////// 🎯 ПОКАЗАТЬ МЕНЮ ВЫБОРА СТАТУСА
-  //////////////////////////////////////////////////////
   async showStatusMenu(chatId, vacancyId, messageId) {
     try {
-      // 1. Проверяем авторизацию
       if (!sessionManager.isAuthenticated(chatId)) {
         bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
         return;
       }
 
-      // 2. Получаем данные вакансии
       const session = sessionManager.getSession(chatId);
-      const vacancy = await VacanciesService.getVacancy(
-        parseInt(vacancyId),
-        session.user.id
-      );
+      const vacancy = await VacanciesService.getVacancy(parseInt(vacancyId), session.user.id);
 
-      // 3. Формируем сообщение с меню
-      const message = `📋 **Выберите новый статус для вакансии:**\n\n"${
-        vacancy.jobTitle
-      }"\n\nТекущий статус: ${this.statusEmojis[vacancy.status]}`;
+      const message = `📋 **Выберите новый статус для вакансии:**\n\n"${vacancy.jobTitle}"\n\nТекущий статус: ${this.statusEmojis[vacancy.status]}`;
 
-      // 4. Создаем кнопки статусов
       const keyboard = {
         inline_keyboard: [
           [
-            {
-              text: "🔍 Найдена",
-              callback_data: `set_status_${vacancyId}_found`,
-            },
-            {
-              text: "📤 Откликнулся",
-              callback_data: `set_status_${vacancyId}_applied`,
-            },
+            { text: "🔍 Найдена", callback_data: `set_status_${vacancyId}_found` },
+            { text: "📤 Откликнулся", callback_data: `set_status_${vacancyId}_applied` },
           ],
           [
-            {
-              text: "⏳ В ожидании",
-              callback_data: `set_status_${vacancyId}_waiting`,
-            },
-            {
-              text: "💼 Собеседование",
-              callback_data: `set_status_${vacancyId}_interview`,
-            },
+            { text: "⏳ В ожидании", callback_data: `set_status_${vacancyId}_waiting` },
+            { text: "💼 Собеседование", callback_data: `set_status_${vacancyId}_interview` },
           ],
           [
-            {
-              text: "🎉 Оффер",
-              callback_data: `set_status_${vacancyId}_offer`,
-            },
-            {
-              text: "❌ Отказ",
-              callback_data: `set_status_${vacancyId}_rejected`,
-            },
+            { text: "🎉 Оффер", callback_data: `set_status_${vacancyId}_offer` },
+            { text: "❌ Отказ", callback_data: `set_status_${vacancyId}_rejected` },
           ],
           [
-            {
-              text: "📁 Архив",
-              callback_data: `set_status_${vacancyId}_archived`,
-            },
-            { text: "❌ Отмена", callback_data: `cancel_${vacancyId}` },
+            { text: "📁 Архив", callback_data: `set_status_${vacancyId}_archived` },
+            { text: "❌ Отмена", callback_data: `cancel_editVacancy_${vacancyId}` },
           ],
         ],
       };
 
-      // 5. Показываем меню (редактируем текущее сообщение)
       await bot.editMessageText(message, {
         chat_id: chatId,
         message_id: messageId,
@@ -144,120 +97,72 @@ class VacancyHandlers {
         reply_markup: keyboard,
       });
     } catch (error) {
-      const message = handleBotError(error);
-      bot.sendMessage(chatId, message);
+      bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
-  //////////////////////////////////// 🎯 ОБРАБОТКА СМЕНЫ СТАТУСА
-  //////////////////////////////////////////////////////
   async handleStatusChange(bot, chatId, vacancyId, newStatus, messageId) {
     try {
-      // 1. Проверяем авторизацию
       if (!sessionManager.isAuthenticated(chatId)) {
         bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
         return;
       }
 
-      // 2. Получаем сессию пользователя
       const session = sessionManager.getSession(chatId);
+      await VacanciesService.updateVacancyStatus(parseInt(vacancyId), session.user.id, newStatus);
 
-      // 3. Пытаемся обновить статус через API
-      await VacanciesService.updateVacancyStatus(
-        parseInt(vacancyId),
-        session.user.id,
-        newStatus
-      );
-
-      // 4. Если дошли сюда - значит успешно обновили статус в базе!
-      const updatedVacancy = await VacanciesService.getVacancy(
-        parseInt(vacancyId),
-        session.user.id
-      );
-
-      // 5. Показываем успех
       const successMessage = `✅ Статус обновлен: ${this.statusEmojis[newStatus]}`;
-      const message = this.formatVacancyDetails(updatedVacancy);
-
-      // 📍 Меняем сообщение с меню статусов на детали вакансии
-      await bot.editMessageText(message, {
-        chat_id: chatId,
-        message_id: messageId,
-        parse_mode: "Markdown",
-      });
-
-      // 📍 Отправляем отдельное сообщение об успехе
-      bot.sendMessage(chatId, successMessage);
+      await bot.sendMessage(chatId, successMessage);
+      await this.handleVacancyCommand(chatId, vacancyId);
     } catch (error) {
-      // 🔥 ЕСЛИ ОШИБКА: просто показываем сообщение об ошибке
-      const message = handleBotError(error);
-      bot.sendMessage(chatId, message);
+      bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
-  //////////////////////////////////// 📋 КОМАНДА /VACANCY <ID> - ПОКАЗАТЬ ДЕТАЛИ ВАКАНСИИ
-  //////////////////////////////////////////////////////
   async handleVacancyCommand(chatId, vacancyId) {
     try {
-      // 1. Проверяем авторизацию
       if (!sessionManager.isAuthenticated(chatId)) {
         bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
         return;
       }
 
-      // 2. Проверяем что ID вакансии - число
       if (!/^\d+$/.test(vacancyId)) {
-        bot.sendMessage(
-          chatId,
-          "❌ Неверный формат ID. Используйте: /vacancy <число>"
-        );
+        bot.sendMessage(chatId, "❌ Неверный формат ID. Используйте: /vacancy <число>");
         return;
       }
 
-      // 3. Получаем вакансию из базы
       const session = sessionManager.getSession(chatId);
-      const vacancy = await VacanciesService.getVacancy(
-        vacancyId,
-        session.user.id
-      );
+      const vacancy = await VacanciesService.getVacancy(vacancyId, session.user.id);
 
-      // 4. Форматируем и показываем детали
       const message = this.formatVacancyDetails(vacancy);
       const keyboard = {
         inline_keyboard: [
           [
-            {
-              text: "Назад к списку вакансий",
-              callback_data: `getVacancies`,
-            },
+            { text: "Редактировать данные", callback_data: `editVacancy_${vacancy.id}` },
+            { text: "Изменить статус вакансии", callback_data: `show_status_menu_${vacancy.id}` }
+          ],
+          [
+            { text: "Назад к списку вакансий", callback_data: `getVacancies` },
           ],
         ],
       };
+      
       bot.sendMessage(chatId, message, {
         parse_mode: "Markdown",
         reply_markup: keyboard,
       });
     } catch (error) {
-      const message = handleBotError(error);
-      bot.sendMessage(chatId, message);
+      bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
-  //////////////////////////////////// ✏️ МЕНЮ РЕДАКТИРОВАНИЯ ВАКАНСИИ
-  //////////////////////////////////////////////////////
   showEditMenu(chatId, vacancyId) {
     const keyboard = {
       reply_markup: {
         inline_keyboard: [
           [
-            {
-              text: "🏢 Компания",
-              callback_data: `editDataVacancy_${vacancyId}_companyName`,
-            },
-            {
-              text: "💼 Должность",
-              callback_data: `editDataVacancy_${vacancyId}_jobTitle`,
-            },
+            { text: "🏢 Компания", callback_data: `editDataVacancy_${vacancyId}_companyName` },
+            { text: "💼 Должность", callback_data: `editDataVacancy_${vacancyId}_jobTitle` },
           ],
           [
             { text: "💰 Зарплата", callback_data: `editDataVacancy_${vacancyId}_salary` },
@@ -269,10 +174,7 @@ class VacancyHandlers {
           ],
           [
             { text: "📋 Заметки", callback_data: `editDataVacancy_${vacancyId}_notes` },
-            {
-              text: "❌ Отмена",
-              callback_data: `cancel_editVacancy_${vacancyId}`,
-            },
+            { text: "❌ Отмена", callback_data: `cancel_editVacancy_${vacancyId}` },
           ],
         ],
       },
@@ -281,93 +183,58 @@ class VacancyHandlers {
     bot.sendMessage(chatId, "Что хотите изменить?", keyboard);
   }
 
-  //////////////////////////////////////////////////////
-
   async startEditVacancyField(chatId, vacancyId, editModule) {
     const session = sessionManager.getSession(chatId);
     session.editingVacancy = {
       vacancyId: vacancyId,
       field: editModule,
-      step: "awaiting_input", // 🔥 Важный флаг - ждём ввод пользователя
+      step: "awaiting_input",
     };
-    const vacancy = await VacanciesService.getVacancy(
-      vacancyId,
-      session.user.id
-    );
 
+    const vacancy = await VacanciesService.getVacancy(vacancyId, session.user.id);
     const keyboard = {
       inline_keyboard: [
         [
-          {
-            text: "❌ Отменить редактирование",
-            callback_data: `cancel_editDataVacancy_${vacancyId}`,
-          },
+          { text: "❌ Отменить редактирование", callback_data: `cancel_editDataVacancy_${vacancyId}` },
         ],
       ],
     };
 
-    bot.sendMessage(
-      chatId,
-      `Текущее значение: ${vacancy[editModule] || "не указано"}`,
-      {
-        parse_mode: "Markdown",
-        reply_markup: keyboard,
-      }
-    );
+    bot.sendMessage(chatId, `Текущее значение: ${vacancy[editModule] || "не указано"}`, {
+      parse_mode: "Markdown",
+      reply_markup: keyboard,
+    });
   }
 
   async start2EditVacancyField(chatId, newValue, session) {
-    try{
-    const { vacancyId, field } = session.editingVacancy;
-    const updateData = {
-      [field]: newValue, // Например: { companyName: "Google" }
-    };
-    await VacanciesService.patchVacancyData(
-      parseInt(vacancyId), // id (число)
-      session.user.id, // userId
-      updateData // { companyName: "Новое значение" }
-    );
-    delete session.editingVacancy;
-    bot.sendMessage(chatId, "✅ Изменения сохранены!");
-
-    this.showEditMenu(chatId, vacancyId);
-    }catch(error){
-      const message = handleBotError(error);
-      bot.sendMessage(chatId, message);
+    try {
+      const { vacancyId, field } = session.editingVacancy;
+      const updateData = { [field]: newValue };
+      
+      await VacanciesService.patchVacancyData(parseInt(vacancyId), session.user.id, updateData);
+      
+      delete session.editingVacancy;
+      bot.sendMessage(chatId, "✅ Изменения сохранены!");
+      this.showEditMenu(chatId, vacancyId);
+    } catch (error) {
+      bot.sendMessage(chatId, handleBotError(error));
     }
-
   }
 
-  //////////////////////////////////// 🎯 ФОРМАТИРОВАНИЕ ДЕТАЛЕЙ ВАКАНСИИ
-  //////////////////////////////////////////////////////
   formatVacancyDetails(vacancy) {
     const emoji = this.statusEmojis[vacancy.status] || "📄";
-
     let message = `${emoji} **${vacancy.jobTitle || "Без названия"}**\n\n`;
 
-    // Основная информация
     message += `🏢 **Компания:** ${vacancy.companyName || "Не указана"}\n`;
     message += `💰 **Зарплата:** ${vacancy.salary || "Не указана"}\n`;
     message += `📋 **Платформа:** ${vacancy.sourcePlatform || "Не указана"}\n`;
-    message += `🔗 **Ссылка:** ${vacancy.source_url || "Нет ссылки"}\n\n`;
-
-    // Описание и заметки
+    message += `🔗 **Ссылка:** ${vacancy.sourceUrl || "Нет ссылки"}\n\n`;
     message += `📝 **Описание:**\n${vacancy.description || "Нет описания"}\n\n`;
-    message += `📅 **Дата подачи:** ${
-      vacancy.applicationDate
-        ? new Date(vacancy.applicationDate).toLocaleDateString("ru-RU")
-        : "Не указана"
-    }\n`;
+    message += `📅 **Дата подачи:** ${vacancy.applicationDate ? new Date(vacancy.applicationDate).toLocaleDateString("ru-RU") : "Не указана"}\n`;
     message += `📝 **Заметки:** ${vacancy.notes || "Нет заметок"}\n\n`;
-
-    // Техническая информация
     message += `🆔 **ID:** ${vacancy.id}\n`;
-    message += `📅 **Создана:** ${new Date(
-      vacancy.createdAt
-    ).toLocaleDateString("ru-RU")}\n`;
-    message += `🔄 **Обновлена:** ${new Date(
-      vacancy.updatedAt
-    ).toLocaleDateString("ru-RU")}`;
+    message += `📅 **Создана:** ${new Date(vacancy.createdAt).toLocaleDateString("ru-RU")}\n`;
+    message += `🔄 **Обновлена:** ${new Date(vacancy.updatedAt).toLocaleDateString("ru-RU")}`;
 
     return message;
   }

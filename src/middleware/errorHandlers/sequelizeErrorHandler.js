@@ -13,6 +13,7 @@ const {
 const {
   ValidationError: AppValidationError,
   ConflictError,
+  StructuredValidationError,
 } = require("../../errors/customErrors");
 
 /**
@@ -33,22 +34,22 @@ const handleSequelizeErrors = (error) => {
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // if (error instanceof ValidationError) {
-  //   const structuredErrors = error.errors.map(err => ({
-  //     field: err.path,
-  //     message: err.message,
-  //     value: err.value || null
-  //   }));
-    
-  //   // Используем НОВУЮ кастомную ошибку
-  //   return new StructuredValidationError("Ошибка валидации данных", structuredErrors);
-  // }
-
-
   if (error instanceof ValidationError) {
-  const messages = error.errors.map((err) => `${err.path}: ${err.message}`);
-  return new AppValidationError(messages.join(", "));
-}
+    const structuredErrors = error.errors.map(err => ({
+      field: err.path,
+      message: err.message,
+      value: err.value || null
+    }));
+    
+    // Используем НОВУЮ кастомную ошибку
+    return new StructuredValidationError("Ошибка валидации данных", structuredErrors);
+  }
+
+
+  // if (error instanceof ValidationError) {
+  // const messages = error.errors.map((err) => `${err.path}: ${err.message}`);
+  // return new AppValidationError(messages.join(", "));
+// }
 
   /*
 ПРИМЕР ДЛЯ ЧЕГО ВСЕ ЭТО
