@@ -1,57 +1,49 @@
 //src/bot/utils/errorHandler.js
-
 const {
     AuthenticationError,
-    ForbiddenError,
     NotFoundError,
     ValidationError,
     ConflictError,
-    BadRequestError,
     StatusValidationError,
+    StructuredValidationError,
 } = require('../../errors/customErrors');
 
 function handleBotError(error) {
-    console.error('Ошибка в боте:', error);
+    console.error('Ошибка в боте:', error.name, error.message);
 
-    // 1. Ошибки валидации Sequelize
+    // 1. Обработка Sequelize ошибок
     if (error.name === 'SequelizeValidationError') {
         const messages = error.errors.map(err => `• ${err.message}`).join('\n');
-        return `❌ Ошибка в данных:\n${messages}`;
+        return `❌ Ошибки в данных:\n${messages}\nПопробуйте снова`;
     }
 
-    // 2. Ошибки уникальности Sequelize  
     if (error.name === 'SequelizeUniqueConstraintError') {
         return '❌ Такие данные уже существуют';
     }
 
-    // 3. Ошибки базы данных Sequelize
-    if (error.name === 'SequelizeDatabaseError') {
-        return '❌ Ошибка базы данных';
+    // 2. Обработка кастомных ошибок
+    if (error instanceof StructuredValidationError) {
+        const messages = error.errors.map(err => `• ${err.message}`).join('\n');
+        return `❌ Ошибки в данных:\n${messages}`;
     }
 
-    
-    // 1. Ошибки авторизации
+    if (error instanceof StatusValidationError) {
+        return `❌ ${error.message}`;
+    }
+
     if (error instanceof AuthenticationError) {
         return '🔐 Неверный email или пароль';
     }
 
-    // 2. Ошибки валидации статуса (самые частые)
-    if (error instanceof StatusValidationError) {
-        return `❌ ${error.message}`; // Показываем сообщение как есть
-    }
-
-    // 3. Ресурс не найден
     if (error instanceof NotFoundError) {
         return '❌ Ресурс не найден';
     }
 
-    // 4. Другие ошибки валидации
-    if (error instanceof ValidationError) {
-        return '❌ Некорректные данные';
+    if (error instanceof ValidationError || error instanceof ConflictError) {
+        return `❌ ${error.message}`;
     }
 
-    // 5. Все остальные ошибки
     return '❌ Произошла ошибка. Попробуйте еще раз';
 }
 
-module.exports = {handleBotError};
+module.exports = { handleBotError };

@@ -1,6 +1,7 @@
 //src/bot/handlers/authHandlers.js
 const sessionManager = require("../services/sessionManager");
 const AuthService = require("../../services/authService");
+const menuHandlers = require("./menuHandlers");
 const { handleBotError } = require("../utils/errorHandler");
 
 class AuthHandlers {
@@ -96,7 +97,8 @@ class AuthHandlers {
       );
       sessionManager.createSession(chatId, result.user);
       sessionManager.clearLoginAttempt(chatId);
-      bot.sendMessage(chatId, `✅ Вы вошли как ${result.user.email}`);
+       // 🔥 ПОКАЗЫВАЕМ ГЛАВНОЕ МЕНЮ ПОСЛЕ УСПЕШНОГО ЛОГИНА
+    menuHandlers.showMainMenu(chatId, `✅ Вы вошли как ${result.user.email}`);
      
  
     } catch (error) {

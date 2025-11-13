@@ -19,8 +19,10 @@ const { handleBotError } = require("../bot/utils/errorHandler");
 bot.setMyCommands([
   {command: '/start', description: "Начальное приветствие"},
   {command: '/login', description: "Вход в систему"},
+  {command: '/menu', description: "Главное меню"},
+  {command: '/vacancies', description: "Просмотр текущих вакансий"},
   {command: '/game', description: "Рубануть в игрульку под пивко"},
-])
+]);
 
 // Обработчик команды /start
 bot.onText(/\/start/, async (msg) => {

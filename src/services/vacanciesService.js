@@ -80,7 +80,7 @@ class VacanciesService {
     if (!vacancy) {
       throw new NotFoundError("Вакансия не найдена");
     }
-    const updateVacancy = await vacancy.update(updateData);
+    const updateVacancy = await vacancy.update(updateData, { validate: true });
     return updateVacancy;
   }
 

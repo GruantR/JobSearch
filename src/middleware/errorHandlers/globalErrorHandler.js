@@ -1,6 +1,6 @@
 //src middleware/errorHandlers/globalErrorHandler.js
 const handleSequelizeErrors = require("./sequelizeErrorHandler");
-const { AppError } = require("../../errors/customErrors");
+const { AppError, StructuredValidationError } = require("../../errors/customErrors");
 
 const globalErrorHandler = (error, req, res, next) => {
   // 1. Логируем ошибку для разработчика
@@ -18,6 +18,15 @@ const globalErrorHandler = (error, req, res, next) => {
 
   // 3. Если это наша кастомная ошибка - используем ее статус код
   if (processedError instanceof AppError) {
+        // 🔥 ОСОБАЯ ОБРАБОТКА ДЛЯ StructuredValidationError
+    if (processedError instanceof StructuredValidationError) {
+      return res.status(processedError.statusCode).json({
+        success: false,
+        message: processedError.message,
+        errors: processedError.errors // 🔥 Отдаём структурированные ошибки
+      });
+    }
+        // Обычные кастомные ошибки
     return res.status(processedError.statusCode).json({
       success: false, // Единый формат ответа
       message: processedError.message, // Понятное сообщение для клиента
