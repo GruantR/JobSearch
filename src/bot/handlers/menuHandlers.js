@@ -1,6 +1,7 @@
 // src/bot/handlers/menuHandlers.js
 const bot = require("../bot");
 const sessionManager = require("../services/sessionManager");
+const userHandlers = require("./userHandlers");
 
 class MenuHandlers {
   showMainMenu(chatId, additionalText = "") {
@@ -33,11 +34,12 @@ class MenuHandlers {
     });
   }
 
-  // Обработчики для каждой кнопки меню (пока заглушки)
-  handleMenuProfile(chatId) {
+
+  async handleMenuProfile(chatId) {
     // Будет перенаправлять на команду /me
-    bot.sendMessage(chatId, "📋 Загружаю информацию о профиле...");
-    // Здесь можно вызвать существующий обработчик профиля
+    await bot.sendMessage(chatId, "📋 Загружаю информацию о профиле...");
+    await userHandlers.handleMeAndProfileComand(chatId)
+
   }
 
   handleMenuVacancies(chatId) {

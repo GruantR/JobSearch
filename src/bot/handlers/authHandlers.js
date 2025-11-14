@@ -98,7 +98,7 @@ class AuthHandlers {
       sessionManager.createSession(chatId, result.user);
       sessionManager.clearLoginAttempt(chatId);
        // 🔥 ПОКАЗЫВАЕМ ГЛАВНОЕ МЕНЮ ПОСЛЕ УСПЕШНОГО ЛОГИНА
-    menuHandlers.showMainMenu(chatId, `✅ Вы вошли как ${result.user.email}`);
+      menuHandlers.showMainMenu(chatId, `✅ Вы вошли как ${result.user.email}`);
      
  
     } catch (error) {

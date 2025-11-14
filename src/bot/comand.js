@@ -15,13 +15,14 @@ const SessionManager = require("./services/sessionManager");
 const vacancyHandlers = require('./handlers/vacancyHandlers');
 const VacanciesService = require('../services/vacanciesService');
 const { handleBotError } = require("../bot/utils/errorHandler");
+const menuHandlers = require("./handlers/menuHandlers");
 
 bot.setMyCommands([
-  {command: '/start', description: "Начальное приветствие"},
-  {command: '/login', description: "Вход в систему"},
-  {command: '/menu', description: "Главное меню"},
-  {command: '/vacancies', description: "Просмотр текущих вакансий"},
-  {command: '/game', description: "Рубануть в игрульку под пивко"},
+  { command: '/start', description: "Начальное приветствие" },
+  { command: '/login', description: "Вход в систему" },
+  { command: '/menu', description: "Главное меню" },
+  { command: '/vacancies', description: "Просмотр текущих вакансий" },
+  { command: '/game', description: "Рубануть в игрульку под пивко" },
 ]);
 
 // Обработчик команды /start
@@ -56,8 +57,8 @@ bot.onText(/\/logout/, (msg) => {
   authHandlers.handleLogoutCommand(bot, msg);
 });
 
-bot.onText(/\/me/, (msg) => {
-  userHandlers.handleMeAndProfileComand(bot, msg);
+bot.onText(/^\/me$/, async (msg) => {
+  await userHandlers.handleMeAndProfileComand(msg);
 });
 
 bot.onText(/\/vacancies/, (msg) => {
@@ -66,9 +67,19 @@ bot.onText(/\/vacancies/, (msg) => {
 
 bot.onText(/\/vacancy (.+)/, (msg, match) => {
   console.log(match);
-  
+
   vacancyHandlers.handleVacancyCommand(bot, msg, match);
 });
+
+bot.onText(/^\/menu$/, (msg) => {
+  const chatId = msg.chat.id;
+  if (!SessionManager.isAuthenticated(chatId)) {
+    bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
+    return;
+  }
+  menuHandlers.showMainMenu(chatId);
+});
+
 
 
 
@@ -82,12 +93,12 @@ bot.onText(/\/help/, (msg) => {
   if (isAuthenticated) {
     const session = SessionManager.getSession(chatId);
     message += `✅ **Авторизован как:** ${session.user.email}\n\n`;
-    
+
     message += `👨‍💼 **Работа с вакансиями:**\n`;
     message += `├ /vacancies - Ваши вакансии\n`;
     message += `├ /me - Профиль\n`;
     message += `└ /logout - Выйти\n\n`;
-    
+
     message += `🎮 **Развлечения:**\n`;
     message += `├ /game - Мини-игра\n`;
     message += `└ /help - Справка\n`;
@@ -97,7 +108,7 @@ bot.onText(/\/help/, (msg) => {
     message += `├ /login - Войти в систему\n`;
     message += `├ /game - Мини-игра\n`;
     message += `└ /help - Справка\n\n`;
-    
+
     message += `_После авторизации откроются команды для управления вакансиями_`;
   }
 
@@ -106,32 +117,32 @@ bot.onText(/\/help/, (msg) => {
 
 /////////////////////////////////GAME/////////////////////////////////
 
-async function newGame (chatId) {
+async function newGame(chatId) {
   await bot.sendMessage(chatId, 'Сейчас я загадаю цифру от 0 до 9, попробуй отгадать!');
-  const randomNumber = Math.floor(Math.random()*10);
+  const randomNumber = Math.floor(Math.random() * 10);
   randomGameNumber.chatId = randomNumber
-await bot.sendMessage(chatId, 'Отгадывай', keyboardGame)
+  await bot.sendMessage(chatId, 'Отгадывай', keyboardGame)
 };
 
 const keyboardGame = {
   reply_markup: {
     inline_keyboard: [
-        [
-          { text: "1", callback_data: `game_keyboard_1` },
-          { text: "2", callback_data: `game_keyboard_2` },
-          { text: "3", callback_data: `game_keyboard_3` }
-        ],
-        [
-          { text: "4", callback_data: `game_keyboard_4` },
-          { text: "5", callback_data: `game_keyboard_5` },
-          { text: "6", callback_data: `game_keyboard_6` }
-        ],
-        [
-          { text: "7", callback_data: `game_keyboard_7` },
-          { text: "8", callback_data: `game_keyboard_8` },
-          { text: "9", callback_data: `game_keyboard_9` }
-        ],
-        [{ text: "0", callback_data: `game_keyboard_0` }]
+      [
+        { text: "1", callback_data: `game_keyboard_1` },
+        { text: "2", callback_data: `game_keyboard_2` },
+        { text: "3", callback_data: `game_keyboard_3` }
+      ],
+      [
+        { text: "4", callback_data: `game_keyboard_4` },
+        { text: "5", callback_data: `game_keyboard_5` },
+        { text: "6", callback_data: `game_keyboard_6` }
+      ],
+      [
+        { text: "7", callback_data: `game_keyboard_7` },
+        { text: "8", callback_data: `game_keyboard_8` },
+        { text: "9", callback_data: `game_keyboard_9` }
+      ],
+      [{ text: "0", callback_data: `game_keyboard_0` }]
     ]
   }
 }
@@ -139,9 +150,9 @@ const keyboardGame = {
 const againGame = {
   reply_markup: {
     inline_keyboard: [
-        [
-          { text: "Начать заново", callback_data: '/again' },
-        ]
+      [
+        { text: "Начать заново", callback_data: '/again' },
+      ]
     ]
   }
 }
@@ -151,46 +162,46 @@ const randomGameNumber = {};
 
 bot.onText(/\/game/, async (msg) => {
   const chatId = msg.chat.id;
-    return await newGame(chatId);
+  return await newGame(chatId);
 
 })
 
 
 // 📋 ОБРАБОТКА ОБЫЧНЫХ СООБЩЕНИЙ (не команд)
-bot.on('message', async (msg)=>{
-  
-  
+bot.on('message', async (msg) => {
+
+
   const chatId = msg.chat.id;
   const text = msg.text;
 
   try {
-// 🚫 1. Игнорируем сообщения без текста (фото, стикеры и т.д.)
-  if (!text) return;
+    // 🚫 1. Игнорируем сообщения без текста (фото, стикеры и т.д.)
+    if (!text) return;
 
     // 🚫 2. Игнорируем команды (они обрабатываются в других обработчиках)
-  if (text.startsWith('/')) return;
+    if (text.startsWith('/')) return;
 
-   // Проверяем, находится ли пользователь в процессе логина
-  const loginAttempt = SessionManager.getLoginAttempt(chatId);
+    // Проверяем, находится ли пользователь в процессе логина
+    const loginAttempt = SessionManager.getLoginAttempt(chatId);
     if (loginAttempt) {
-      try{
-       if (loginAttempt.step === 'email') {
-           authHandlers.handleEmailInput(bot, msg);
+      try {
+        if (loginAttempt.step === 'email') {
+          authHandlers.handleEmailInput(bot, msg);
         } else if (loginAttempt.step === 'password') {
           await authHandlers.handlePasswordInput(bot, msg);
         }
         return
-      }catch(error){
-         console.error('Ошибка в процессе логина:', error);
+      } catch (error) {
+        console.error('Ошибка в процессе логина:', error);
         const message = handleBotError(error);
         bot.sendMessage(chatId, `❌ Ошибка при входе: ${message}`);
         return;
       }
     }
 
-// ПРОВЕРЯЕМ - находится ли пользователь в процессе редактирования
-const session = SessionManager.getSession(chatId);
-    if (session && session.editingVacancy && session.editingVacancy.step === 'awaiting_input'){
+    // ПРОВЕРЯЕМ - находится ли пользователь в процессе редактирования
+    const session = SessionManager.getSession(chatId);
+    if (session && session.editingVacancy && session.editingVacancy.step === 'awaiting_input') {
       await vacancyHandlers.start2EditVacancyField(chatId, text, session)
       return;
     }
@@ -200,8 +211,8 @@ const session = SessionManager.getSession(chatId);
       '🤔 Я пока понимаю только команды. Напиши /help чтобы узнать что я умею!'
     );
 
-  }catch(error){
-     console.error('Непредвиденная ошибка в обработчике сообщений:', error);
+  } catch (error) {
+    console.error('Непредвиденная ошибка в обработчике сообщений:', error);
     bot.sendMessage(chatId, '❌ Произошла непредвиденная ошибка. Попробуйте еще раз.');
   }
 
@@ -236,7 +247,7 @@ bot.on('callback_query', async (callbackQuery) => {
   try {
     // 1. Если нажали "Подробнее" о вакансии
     if (data.startsWith('vacancy_')) {
-       const parts = data.split('_');
+      const parts = data.split('_');
       const vacancyId = parts[1]
       await vacancyHandlers.handleVacancyCommand(chatId, vacancyId)
     }
@@ -250,46 +261,50 @@ bot.on('callback_query', async (callbackQuery) => {
     // 3. Если выбрали конкретный статус (например: "set_status_123_applied")
     else if (data.startsWith('set_status_')) {
       const parts = data.split('_');
-      const vacancyId = parts[2]; 
-      const newStatus = parts[3]; 
+      const vacancyId = parts[2];
+      const newStatus = parts[3];
       await vacancyHandlers.handleStatusChange(bot, chatId, vacancyId, newStatus, msg.message_id);
     }
 
 
-// все что касаемо редактрования
-  if (data.startsWith('editVacancy_')) {
-     const vacancyId = data.split('_')[1]
-     await vacancyHandlers.handleVacancyCommand(chatId,vacancyId);
-     vacancyHandlers.showEditMenu(chatId, vacancyId);
-  }
+    // все что касаемо редактрования
+    if (data.startsWith('editVacancy_')) {
+      const vacancyId = data.split('_')[1]
+      await vacancyHandlers.handleVacancyCommand(chatId, vacancyId);
+      vacancyHandlers.showEditMenu(chatId, vacancyId);
+    }
 
 
-  if (data.startsWith('editDataVacancy_')) {
+    if (data.startsWith('editDataVacancy_')) {
       const parts = data.split('_');
       const vacancyId = parts[1];
       const editModule = parts[2];
-      await vacancyHandlers.startEditVacancyField(chatId,vacancyId,editModule)
-      bot.sendMessage(chatId, 'Введите новое значение');   
-  }
+      await vacancyHandlers.startEditVacancyField(chatId, vacancyId, editModule)
+      bot.sendMessage(chatId, 'Введите новое значение');
+    }
 
-  // Кнопка отмены введения новых данных любого из полей редактрования вакансии - переход меню выбора полей для редактрования
-  if (data.startsWith('cancel_editDataVacancy_')){
-    const parts = data.split('_');
-    const vacancyId = parts[2];
-    await vacancyHandlers.handleVacancyCommand(chatId,vacancyId);
-    vacancyHandlers.showEditMenu(chatId, vacancyId);
-  }
+    // Кнопка отмены введения новых данных любого из полей редактрования вакансии - переход меню выбора полей для редактрования
+    if (data.startsWith('cancel_editDataVacancy_')) {
+      const parts = data.split('_');
+      const vacancyId = parts[2];
+      await vacancyHandlers.handleVacancyCommand(chatId, vacancyId);
+      vacancyHandlers.showEditMenu(chatId, vacancyId);
+    }
 
-  // Кнопка отмены выбора полей для редактирования вакансий - переход в подробное описание вакансии
-    if (data.startsWith('cancel_editVacancy_')){
-          const parts = data.split('_');
+    // Кнопка отмены выбора полей для редактирования вакансий - переход в подробное описание вакансии
+    if (data.startsWith('cancel_editVacancy_')) {
+      const parts = data.split('_');
       const vacancyId = parts[2];
       await vacancyHandlers.handleVacancyCommand(chatId, vacancyId)
-  }
-// Кнопка - показать все вакансии
-  if (data === 'getVacancies'){
-    await vacancyHandlers.handleVacanciesCommand(msg)
-  }
+    }
+    // Кнопка - показать все вакансии
+    if (data === 'getVacancies') {
+      await vacancyHandlers.handleVacanciesCommand(msg)
+    }
+
+      if (data === 'menu_profile') {
+      await userHandlers.handleMeAndProfileComand(msg)
+    }
 
 
 
@@ -312,32 +327,32 @@ bot.on('callback_query', async (callbackQuery) => {
 
 
 
-  if (data === '/again') {
-    await newGame(chatId)
-  }
+    if (data === '/again') {
+      await newGame(chatId)
+    }
 
- if (data.startsWith('game_keyboard')) {
-  const idKeyboard =  Number(data.split('_')[2])
-  await bot.sendMessage(chatId, `Ты выбрал кнопку ${idKeyboard}`);  
-if (idKeyboard === randomGameNumber.chatId) {
-  await bot.sendPhoto(chatId, 'https://cdn27.echosevera.ru/64809353eac9120dd845a103/6484502b61cba.jpg')
-    return await bot.sendMessage(chatId, `Ты угадал, ты крут`, againGame);
-}
-else {
-  await bot.sendPhoto(chatId, 'https://cs.pikabu.ru/img_n/2012-10_3/53z.jpg')
-  return await bot.sendMessage(chatId, `Не угадаль, число правильное ${randomGameNumber.chatId}`, againGame);
-}
+    if (data.startsWith('game_keyboard')) {
+      const idKeyboard = Number(data.split('_')[2])
+      await bot.sendMessage(chatId, `Ты выбрал кнопку ${idKeyboard}`);
+      if (idKeyboard === randomGameNumber.chatId) {
+        await bot.sendPhoto(chatId, 'https://cdn27.echosevera.ru/64809353eac9120dd845a103/6484502b61cba.jpg')
+        return await bot.sendMessage(chatId, `Ты угадал, ты крут`, againGame);
+      }
+      else {
+        await bot.sendPhoto(chatId, 'https://cs.pikabu.ru/img_n/2012-10_3/53z.jpg')
+        return await bot.sendMessage(chatId, `Не угадаль, число правильное ${randomGameNumber.chatId}`, againGame);
+      }
 
- }
-
-
+    }
 
 
 
-// ✅ Подтверждаем нажатие кнопки (убираем "часики" в Telegram)
+
+
+    // ✅ Подтверждаем нажатие кнопки (убираем "часики" в Telegram)
     bot.answerCallbackQuery(callbackQuery.id);
 
-  } catch(error) {
+  } catch (error) {
     // 🔥 ПРОСТАЯ ОБРАБОТКА ОШИБОК - только самое необходимое
     console.error('Ошибка в callback_query:', error);
     bot.sendMessage(chatId, '❌ Произошла ошибка при обработке действия');
