@@ -3,12 +3,11 @@ const sessionManager = require('../services/sessionManager');
 const UsersServices = require('../../services/usersService');
 const UserProfileService = require('../../services/userProfilesService');
 const { handleBotError } = require('../utils/errorHandler');
+const bot = require("../bot");
 
 class userHandlers {
-    async handleMeAndProfileComand(bot, msg) {
+    async handleMeAndProfileComand(msg) {
         const chatId = msg.chat.id;
-
-
         try {
             if (!sessionManager.isAuthenticated(chatId)) {
                 bot.sendMessage(chatId, '❌ Сначала войдите в систему через /login');
@@ -18,6 +17,7 @@ class userHandlers {
             const userData = await UsersServices.getUserById(session.user.id);
             const userProfile = await UserProfileService.getUserProfile(session.user.id)
             const message = this.formatUserInfo(userData,userProfile)
+            
             bot.sendMessage(chatId, message)
 
 
