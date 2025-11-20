@@ -1,7 +1,4 @@
-// src/bot/handlers/menuHandlers.js
 const bot = require("../bot");
-const sessionManager = require("../services/sessionManager");
-const userHandlers = require("./userHandlers");
 
 class MenuHandlers {
   showMainMenu(chatId, additionalText = "") {
@@ -14,10 +11,10 @@ class MenuHandlers {
         inline_keyboard: [
           [
             { text: "👤 Профиль", callback_data: "menu_profile" },
-            { text: "📊 Вакансии", callback_data: "menu_vacancies" }
+            { text: "📊 Вакансии", callback_data: "getVacancies" }
           ],
           [
-            { text: "🎮 Игра", callback_data: "menu_game" },
+            { text: "🎮 Игра", callback_data: "again_game" },
             { text: "📈 Аналитика", callback_data: "menu_analytics" }
           ],
           [
@@ -32,41 +29,6 @@ class MenuHandlers {
       parse_mode: "Markdown",
       ...keyboard
     });
-  }
-
-
-  async handleMenuProfile(chatId) {
-    // Будет перенаправлять на команду /me
-    await bot.sendMessage(chatId, "📋 Загружаю информацию о профиле...");
-    await userHandlers.handleMeAndProfileComand(chatId)
-
-  }
-
-  handleMenuVacancies(chatId) {
-    // Будет перенаправлять на команду /vacancies
-    bot.sendMessage(chatId, "📊 Загружаю список вакансий...");
-  }
-
-  handleMenuGame(chatId) {
-    // Будет перенаправлять на команду /game
-    bot.sendMessage(chatId, "🎮 Запускаю игру...");
-  }
-
-  handleMenuAnalytics(chatId) {
-    bot.sendMessage(chatId, "📈 *Аналитика*\n\nРаздел в разработке 🚧", {
-      parse_mode: "Markdown"
-    });
-  }
-
-  handleMenuRecruiters(chatId) {
-    bot.sendMessage(chatId, "👥 *Рекрутеры*\n\nРаздел в разработке 🚧", {
-      parse_mode: "Markdown"
-    });
-  }
-
-  handleMenuLogout(chatId) {
-    bot.sendMessage(chatId, "🚪 Выход из системы...");
-    // Здесь можно вызвать существующий обработчик выхода
   }
 }
 
