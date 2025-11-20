@@ -11,6 +11,8 @@ const { newGame, againGame, randomGameNumber } = require('./handlers/gameHandler
 bot.setMyCommands([
   { command: '/start', description: "Начальное приветствие" },
   { command: '/login', description: "Вход в систему" },
+  { command: '/menu', description: "Главное меню (требуется авторизация)" },
+  { command: '/game', description: "Просто игрулька (не требуется авторизация)" },
   { command: '/help', description: "Справка по командам" }
 ]);
 
@@ -29,7 +31,8 @@ bot.onText(/\/start/, async (msg) => {
     message += `Используйте /menu для доступа ко всем функциям`;
   } else {
     message += `Чтобы начать работу, войдите в систему:\n`;
-    message += `/login - войти в систему`;
+    message += `/login - войти в систему\n`;
+    message += `/help - доступные команды`;
   }
 
   await bot.sendMessage(chatId, message);
@@ -89,6 +92,9 @@ bot.onText(/\/help/, (msg) => {
     message += `├ /start - Начать работу\n`;
     message += `├ /login - Войти в систему\n`;
     message += `└ /help - Справка\n`;
+
+    message += `🎮 **Развлечения:**\n`;
+    message += `└ /game - Мини-игра\n`;
   }
 
   bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });

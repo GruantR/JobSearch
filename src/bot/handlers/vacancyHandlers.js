@@ -48,7 +48,6 @@ class VacancyHandlers {
         };
 
         bot.sendMessage(chatId, message, {
-          parse_mode: "Markdown",
           reply_markup: keyboard,
         });
       });
@@ -148,7 +147,6 @@ class VacancyHandlers {
       };
       
       bot.sendMessage(chatId, message, {
-        parse_mode: "Markdown",
         reply_markup: keyboard,
       });
     } catch (error) {
