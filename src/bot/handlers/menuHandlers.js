@@ -25,7 +25,7 @@ class MenuHandlers {
       }
     };
 
-    bot.sendMessage(chatId, message, {
+        bot.sendMessage(chatId, message, {
       parse_mode: "Markdown",
       ...keyboard
     });
