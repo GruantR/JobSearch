@@ -2,6 +2,7 @@
 const sessionManager = require("../services/sessionManager");
 const AuthService = require("../../services/authService");
 const menuHandlers = require("./menuHandlers");
+const bot = require("../bot");
 const { handleBotError } = require("../utils/errorHandler");
 
 class AuthHandlers {
@@ -25,7 +26,7 @@ class AuthHandlers {
     // TODO: Если нет - начать процесс логина
   }
 
-  handleLogoutCommand(bot, msg) {
+  handleLogoutCommand(msg) {
     const chatId = msg.chat.id;
     if (!sessionManager.isAuthenticated(chatId)) {
       bot.sendMessage(chatId, `Вы не в системе`);
