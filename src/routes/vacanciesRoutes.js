@@ -50,7 +50,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                 type: string
  *                 example: "hh.ru"
  *                 description: "Платформа источника (до 100 символов)"
- *               source_url:
+ *               sourceUrl:
  *                 type: string
  *                 example: "https://hh.ru/vacancy/123456"
  *                 description: "URL вакансии (до 500 символов)"
@@ -80,7 +80,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                 jobTitle: "Senior Frontend Developer"
  *                 description: "Разработка пользовательских интерфейсов на React"
  *                 sourcePlatform: "hh.ru"
- *                 source_url: "https://hh.ru/vacancy/123456"
+ *                 sourceUrl: "https://hh.ru/vacancy/123456"
  *                 salary: "от 200 000 руб."
  *                 applicationDate: "2024-01-15T10:30:00.000Z"
  *                 notes: "Очень перспективная вакансия"
@@ -122,7 +122,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                     - field: "jobTitle"
  *                       message: "Должность обязательна"
  *                       value: ""
- *                     - field: "source_url"
+ *                     - field: "sourceUrl"
  *                       message: "URL источника должен быть валидной ссылкой"
  *                       value: "invalid-url"
  *               singleError:
@@ -526,7 +526,7 @@ router.delete('/:id', authorizeToken, VacanciesController.deleteVacancy);
  *               sourcePlatform:
  *                 type: string
  *                 example: "linkedin"
- *               source_url:
+ *               sourceUrl:
  *                 type: string
  *                 example: "https://linkedin.com/jobs/view/123"
  *               salary:
@@ -597,7 +597,7 @@ router.delete('/:id', authorizeToken, VacanciesController.deleteVacancy);
  *                     - field: "jobTitle"
  *                       message: "Должность обязательна"
  *                       value: ""
- *                     - field: "source_url"
+ *                     - field: "sourceUrl"
  *                       message: "URL источника должен быть валидной ссылкой"
  *                       value: "invalid-url"
  *               singleError:
