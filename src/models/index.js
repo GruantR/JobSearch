@@ -86,11 +86,11 @@ const initializeDatabase = async () => {
     await sequelize.authenticate();
     console.log(`✅ База данных подключена (${process.env.NODE_ENV})`);
 
-    const syncOptions = {};
-//     const syncOptions = {
-//   force: true, // ⚠️ УДАЛЯЕТ все таблицы и пересоздаёт их
-//   logging: false
-// };
+   // const syncOptions = {};
+    const syncOptions = {
+  force: true, // ⚠️ УДАЛЯЕТ все таблицы и пересоздаёт их
+  logging: false
+};
 
     if (process.env.NODE_ENV === "development") {
       syncOptions.alter = true;
