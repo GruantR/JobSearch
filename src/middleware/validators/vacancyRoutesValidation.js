@@ -53,17 +53,19 @@ class VacancyRoutesValidation {
         .optional()
         .isLength({ max: 10000 })
         .withMessage("Заметки не должны превышать 10000 символов")
-        .trim(),
+        .trim()
+      //   ,
 
-      // Статус игнорируем, так как при создании всегда 'found'
-      body("status")
-        .optional()
-        .custom((value) => {
-          if (value && value !== 'found') {
-            throw new Error('При создании вакансии статус игнорируется и устанавливается в "found"');
-          }
-          return true;
-        })
+
+      // // Статус игнорируем, так как при создании всегда 'found'
+      // body("status")
+      //   .optional()
+      //   .custom((value) => {
+      //     if (value && value !== 'found') {
+      //       throw new Error('При создании вакансии статус игнорируется и устанавливается в "found"');
+      //     }
+      //     return true;
+      //   })
     ];
   }
 
