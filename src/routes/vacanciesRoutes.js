@@ -63,6 +63,11 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                 format: date-time
  *                 example: "2024-01-15T10:30:00.000Z"
  *                 description: "Дата отклика"
+ *               status:
+ *                 type: string
+ *                 enum: [found, applied, waiting, interview, offer, rejected, archived]
+ *                 example: "applied"
+ *                 description: "Новый статус вакансии"
  *               notes:
  *                 type: string
  *                 example: "Интересная вакансия с современным стеком"
@@ -83,6 +88,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                 sourceUrl: "https://hh.ru/vacancy/123456"
  *                 salary: "от 200 000 руб."
  *                 applicationDate: "2024-01-15T10:30:00.000Z"
+ *                 status: applied
  *                 notes: "Очень перспективная вакансия"
  *     responses:
  *       201:
