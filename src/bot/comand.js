@@ -7,6 +7,10 @@ const { handleBotError } = require("../bot/utils/errorHandler");
 const menuHandlers = require("./handlers/menuHandlers");
 const { newGame, againGame, randomGameNumber } = require('./handlers/gameHandlers');
 
+
+// Ультра-простая версия
+if (!bot?.setMyCommands) return console.log('⏸️  Бот отключен'), module.exports = bot;
+
 // 📋 КОМАНДЫ БОТА (упрощенный список)
 bot.setMyCommands([
   { command: '/start', description: "Начальное приветствие" },
