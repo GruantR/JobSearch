@@ -35,7 +35,7 @@ class VacanciesService {
   }
 
   async createVacancy(info) {
-    const vacancyData = { ...info, status: 'found', applicationDate: info.applicationDate || null };
+    const vacancyData = { ...info, applicationDate: info.applicationDate || null };
     const vacancy = await Vacancy.create(vacancyData);
     return vacancy;
   }
