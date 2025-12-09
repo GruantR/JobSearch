@@ -9,8 +9,9 @@ class VacancyHandlers {
     return {
       found: "🔍 Найдена вакансия",
       applied: "📤 Откликнулся",
-      waiting: "⏳ В ожидании ответа",
-      interview: "💼 Собеседование",
+      viewed: "👀 Просмотрена",
+      noResponse: "⏳ Нет ответа",
+      invited: "💼 Приглашение / интервью",
       offer: "🎉 Оффер",
       rejected: "❌ Отказ",
       archived: "📁 Архивирована",
@@ -75,14 +76,15 @@ class VacancyHandlers {
             { text: "📤 Откликнулся", callback_data: `set_status_${vacancyId}_applied` },
           ],
           [
-            { text: "⏳ В ожидании", callback_data: `set_status_${vacancyId}_waiting` },
-            { text: "💼 Собеседование", callback_data: `set_status_${vacancyId}_interview` },
+            { text: "👀 Просмотрена", callback_data: `set_status_${vacancyId}_viewed` },
+            { text: "⏳ Нет ответа", callback_data: `set_status_${vacancyId}_noResponse` },
           ],
           [
+            { text: "💼 Приглашение", callback_data: `set_status_${vacancyId}_invited` },
             { text: "🎉 Оффер", callback_data: `set_status_${vacancyId}_offer` },
-            { text: "❌ Отказ", callback_data: `set_status_${vacancyId}_rejected` },
           ],
           [
+            { text: "❌ Отказ", callback_data: `set_status_${vacancyId}_rejected` },
             { text: "📁 Архив", callback_data: `set_status_${vacancyId}_archived` },
             { text: "❌ Отмена", callback_data: `cancel_editVacancy_${vacancyId}` },
           ],
