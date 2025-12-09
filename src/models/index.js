@@ -86,23 +86,28 @@ const initializeDatabase = async () => {
     await sequelize.authenticate();
     console.log(`✅ База данных подключена (${process.env.NODE_ENV})`);
 
-    const syncOptions = {
-  force: false, // ⚠️ УДАЛЯЕТ все таблицы и пересоздаёт их
-  logging: false
-};
 
+    // 🔴 ВАЖНО: В production НИКОГДА не используем sync!
     if (process.env.NODE_ENV === "development") {
-      syncOptions.alter = true;
-      syncOptions.logging = false; // убираем логирование в консоли от синхронизации
-      console.log("🔄 Режим разработки: включен auto-alter");
+      // Только в разработке
+      const syncOptions = {
+        alter: false, // ⚠️ Лучше false для безопасности
+        force: true, // ⚠️ Никогда true в продакшене!
+        logging: false
+      };
+      
+      await sequelize.sync(syncOptions);
+      console.log("🔄 Режим разработки: sync выполнен");
     } else {
-      syncOptions.alter = false;
-      syncOptions.logging = false;// убираем логирование в консоли от синхронизации
-      console.log("🔒 Production режим: отключен auto-alter");
+      // В production вообще не вызываем sync
+        const syncOptions = {
+        force: true, // ⚠️ Никогда true в продакшене!
+      };
+      
+      await sequelize.sync(syncOptions);
+      console.log("🔒 Production: sync пропущен, используйте миграции");
     }
 
-    await sequelize.sync(syncOptions);
-    console.log("✅ Модели синхронизированы");
 
     return true;
   } catch (error) {
