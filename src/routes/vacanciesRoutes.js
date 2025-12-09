@@ -63,6 +63,11 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                 format: date-time
  *                 example: "2024-01-15T10:30:00.000Z"
  *                 description: "Дата отклика"
+ *               status:
+ *                 type: string
+ *                 enum: [found, applied, viewed, noResponse, invited, offer, rejected, archived]
+ *                 example: "applied"
+ *                 description: "Новый статус вакансии"
  *               notes:
  *                 type: string
  *                 example: "Интересная вакансия с современным стеком"
@@ -83,6 +88,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                 sourceUrl: "https://hh.ru/vacancy/123456"
  *                 salary: "от 200 000 руб."
  *                 applicationDate: "2024-01-15T10:30:00.000Z"
+ *                 status: applied
  *                 notes: "Очень перспективная вакансия"
  *     responses:
  *       201:
@@ -704,7 +710,7 @@ router.patch('/:id', authorizeToken, VacancyRoutesValidation.validateUpdateVacan
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [found, applied, waiting, interview, offer, rejected, archived]
+ *                 enum: [found, applied, viewed, noResponse, invited, offer, rejected, archived]
  *                 example: "applied"
  *                 description: "Новый статус вакансии"
  *               notes:
@@ -758,7 +764,7 @@ router.patch('/:id', authorizeToken, VacancyRoutesValidation.validateUpdateVacan
  *                 summary: Ошибка бизнес-логики
  *                 value:
  *                   success: false
- *                   message: "Нельзя перейти из статуса \"found\" в \"offer\". Разрешенные переходы: applied, waiting, interview, archived"
+ *                   message: "Нельзя перейти из статуса \"found\" в \"offer\". Разрешенные переходы: applied, viewed, noResponse, invited, archived"
  *       401:
  *         description: Не авторизован
  *         content:
