@@ -65,7 +65,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                 description: "Дата отклика"
  *               status:
  *                 type: string
- *                 enum: [found, applied, waiting, interview, offer, rejected, archived]
+ *                 enum: [found, applied, viewed, noResponse, invited, offer, rejected, archived]
  *                 example: "applied"
  *                 description: "Новый статус вакансии"
  *               notes:
@@ -710,7 +710,7 @@ router.patch('/:id', authorizeToken, VacancyRoutesValidation.validateUpdateVacan
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [found, applied, waiting, interview, offer, rejected, archived]
+ *                 enum: [found, applied, viewed, noResponse, invited, offer, rejected, archived]
  *                 example: "applied"
  *                 description: "Новый статус вакансии"
  *               notes:
@@ -764,7 +764,7 @@ router.patch('/:id', authorizeToken, VacancyRoutesValidation.validateUpdateVacan
  *                 summary: Ошибка бизнес-логики
  *                 value:
  *                   success: false
- *                   message: "Нельзя перейти из статуса \"found\" в \"offer\". Разрешенные переходы: applied, waiting, interview, archived"
+ *                   message: "Нельзя перейти из статуса \"found\" в \"offer\". Разрешенные переходы: applied, viewed, noResponse, invited, archived"
  *       401:
  *         description: Не авторизован
  *         content:

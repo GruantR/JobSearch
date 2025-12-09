@@ -91,10 +91,11 @@ const Vacancy = sequelize.define(
     },
     status: {
       type: DataTypes.ENUM(
-        "found", //   -- Найдена вакансия
-        "applied", //   -- Откликнулся
-        "waiting", //  -- В ожидании ответа
-        "interview", //  -- Собеседование
+        "found", //   -- Найдена вакансия (по умолчанию)
+        "applied", //   -- Отклик отправлен
+        "viewed", //   -- Просмотрено работодателем, ответа нет
+        "noResponse", //  -- Нет ответа (ожидаем)
+        "invited", //  -- Приглашение/интервью
         "offer", //  -- Оффер
         "rejected", //  -- Отказ
         "archived"
@@ -106,8 +107,9 @@ const Vacancy = sequelize.define(
             [
               "found",
               "applied",
-              "waiting",
-              "interview",
+              "viewed",
+              "noResponse",
+              "invited",
               "offer",
               "rejected",
               "archived",
