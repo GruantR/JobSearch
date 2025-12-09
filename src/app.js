@@ -18,7 +18,6 @@ const cors = require('cors');
 //     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 //     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 //   }));
-  
 
   // Или для полного доступа (на время разработки):
 app.use(cors());
@@ -38,6 +37,7 @@ app.use(logger);
 app.use('/api', routes);
 
 app.use(globalErrorHandler);
+
 
 
 module.exports = app;
