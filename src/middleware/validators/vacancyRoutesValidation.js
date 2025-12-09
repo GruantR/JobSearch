@@ -138,7 +138,7 @@ class VacancyRoutesValidation {
       body("status")
         .notEmpty()
         .withMessage("Новый статус обязателен")
-        .isIn(["found", "applied", "waiting", "interview", "offer", "rejected", "archived"])
+        .isIn(["found", "applied", "viewed", "noResponse", "invited", "offer", "rejected", "archived"])
         .withMessage("Недопустимый статус вакансии"),
 
       body("notes")

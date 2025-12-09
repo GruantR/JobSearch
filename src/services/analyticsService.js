@@ -68,8 +68,9 @@ class AnalyticsService {
     const stats = {
       found: 0,       // Нашли вакансию
       applied: 0,     // Откликнулись
-      waiting: 0,     // Ведем общение (после отклика)
-      interview: 0,   // Собеседование
+      viewed: 0,      // Просмотрено, ответа нет
+      noResponse: 0,  // Нет ответа
+      invited: 0,     // Приглашение/интервью
       offer: 0,       // Оффер
       rejected: 0,    // Отказ
       archived: 0,    // В архиве
@@ -90,11 +91,11 @@ class AnalyticsService {
     // Воронка откликов на вакансии
     async getVacanciesFunnel(userId) {
       const stats = await this.getVacanciesStats(userId);
-      const totalActive = stats.applied + stats.waiting + stats.interview + stats.offer;
+    const totalActive = stats.applied + stats.viewed + stats.noResponse + stats.invited + stats.offer;
       const interviewRate = stats.applied > 0 ? 
-        (stats.interview / stats.applied * 100).toFixed(1) : 0;
-      const offerRate = stats.interview > 0 ? 
-        (stats.offer / stats.interview * 100).toFixed(1) : 0;
+      (stats.invited / stats.applied * 100).toFixed(1) : 0;
+    const offerRate = stats.invited > 0 ? 
+      (stats.offer / stats.invited * 100).toFixed(1) : 0;
       const successRate = stats.applied > 0 ? 
         (stats.offer / stats.applied * 100).toFixed(1) : 0;
       
@@ -104,8 +105,9 @@ class AnalyticsService {
 
         found: stats.found,                  // Нашли, но не откликнулись
         applied: stats.applied,              // Откликнулись
-        inProcess: stats.waiting,            // Ведем общение
-        interviews: stats.interview,         // На собеседованиях
+      viewed: stats.viewed,                // Просмотрены, ответ не получен
+      awaitingResponse: stats.noResponse,  // Нет ответа
+      invited: stats.invited,              // Приглашение/интервью
         offers: stats.offer,                 // Получили офферы
         rejected: stats.rejected             // Получили отказы
         },
