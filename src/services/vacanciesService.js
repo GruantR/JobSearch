@@ -14,8 +14,9 @@ class VacanciesService {
     return [
       "found",
       "applied",
-      "waiting",
-      "interview",
+      "viewed",
+      "noResponse",
+      "invited",
       "offer",
       "rejected",
       "archived",
@@ -93,13 +94,14 @@ class VacanciesService {
     this.validateStatus(newStatus);
     // Определяем разрешенные переходы
     const allowedTransitions = {
-      found: ["applied", "waiting", "interview", "archived"],
-      applied: ["waiting", "interview", "rejected", "archived"],
-      waiting: ["interview", "offer", "rejected", "archived"],
-      interview: ["waiting", "offer", "rejected", "archived"],
-      offer: ["waiting", "rejected", "archived"],
-      rejected: ["applied", "waiting", "archived"],
-      archived: ["found", "applied", "waiting"],
+      found: ["applied", "viewed", "noResponse", "invited", "archived"],
+      applied: ["viewed", "noResponse", "invited", "rejected", "archived"],
+      viewed: ["noResponse", "invited", "rejected", "archived"],
+      noResponse: ["invited", "offer", "rejected", "archived"],
+      invited: ["noResponse", "offer", "rejected", "archived"],
+      offer: ["noResponse", "rejected", "archived"],
+      rejected: ["applied", "viewed", "noResponse", "archived"],
+      archived: ["found", "applied", "viewed", "noResponse"],
     };
 
     // Если это первый статус (oldStatus null) - разрешаем
@@ -125,8 +127,9 @@ class VacanciesService {
     const descriptions = {
       found: "Найдена вакансия 🔍",
       applied: "Откликнулся 📤",
-      waiting: "В ожидании ответа ⏳",
-      interview: "Собеседование 💼",
+      viewed: "Просмотрена, ответа нет 👀",
+      noResponse: "Нет ответа ⏳",
+      invited: "Приглашение / интервью 💼",
       offer: "Получен оффер 🎉",
       rejected: "Отказ ❌",
       archived: "В архиве 📁",
@@ -146,7 +149,7 @@ class VacanciesService {
     if (newStatus === "applied") {
       updateData.applicationDate = new Date();
     }
-    if (["waiting", "interview"].includes(newStatus)) {
+    if (["noResponse", "invited"].includes(newStatus)) {
       updateData.lastContactDate = new Date();
     }
 

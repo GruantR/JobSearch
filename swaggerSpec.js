@@ -245,7 +245,7 @@ const options = {
               },
               status: {
                 type: "string",
-                enum: ["found", "applied", "waiting", "interview", "offer", "rejected", "archived"],
+                enum: ["found", "applied", "viewed", "noResponse", "invited", "offer", "rejected", "archived"],
                 example: "found",
                 description: "Текущий статус вакансии в процессе отклика",
               },
@@ -440,15 +440,20 @@ const options = {
                     example: 8,
                     description: "Количество вакансий в статусе 'applied'"
                   },
-                  waiting: {
+                  viewed: {
+                    type: "integer",
+                    example: 6,
+                    description: "Количество вакансий в статусе 'viewed'"
+                  },
+                  noResponse: {
                     type: "integer",
                     example: 4,
-                    description: "Количество вакансий в статусе 'waiting'"
+                    description: "Количество вакансий в статусе 'noResponse'"
                   },
-                  interview: {
+                  invited: {
                     type: "integer",
                     example: 3,
-                    description: "Количество вакансий в статусе 'interview'"
+                    description: "Количество вакансий в статусе 'invited'"
                   },
                   offer: {
                     type: "integer",
@@ -489,15 +494,20 @@ const options = {
                         example: 8,
                         description: "Откликнулись"
                       },
-                      inProcess: {
-                        type: "integer",
-                        example: 4,
-                        description: "Ведем общение"
-                      },
-                      interviews: {
+                      viewed: {
                         type: "integer",
                         example: 3,
-                        description: "На собеседованиях"
+                        description: "Просмотрены без ответа"
+                      },
+                      awaitingResponse: {
+                        type: "integer",
+                        example: 4,
+                        description: "Нет ответа от работодателя"
+                      },
+                      invited: {
+                        type: "integer",
+                        example: 2,
+                        description: "Приглашение / интервью"
                       },
                       offers: {
                         type: "integer",
@@ -521,8 +531,8 @@ const options = {
                       },
                       interviewRate: {
                         type: "string",
-                        example: "37.5%",
-                        description: "Процент приглашений на собеседование от откликов"
+                        example: "25.0%",
+                        description: "Процент приглашений/интервью от откликов"
                       },
                       offerRate: {
                         type: "string",

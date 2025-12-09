@@ -87,7 +87,7 @@ const initializeDatabase = async () => {
     console.log(`✅ База данных подключена (${process.env.NODE_ENV})`);
 
     const syncOptions = {
-  force: false, // ⚠️ УДАЛЯЕТ все таблицы и пересоздаёт их
+  force: true, // ⚠️ УДАЛЯЕТ все таблицы и пересоздаёт их
   logging: false
 };
 
