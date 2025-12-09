@@ -86,17 +86,13 @@ const initializeDatabase = async () => {
     await sequelize.authenticate();
     console.log(`✅ База данных подключена (${process.env.NODE_ENV})`);
 
-    const syncOptions = {
-  force: true, // ⚠️ УДАЛЯЕТ все таблицы и пересоздаёт их
-  logging: false
-};
 
     // 🔴 ВАЖНО: В production НИКОГДА не используем sync!
     if (process.env.NODE_ENV === "development") {
       // Только в разработке
       const syncOptions = {
         alter: false, // ⚠️ Лучше false для безопасности
-        force: false, // ⚠️ Никогда true в продакшене!
+        force: true, // ⚠️ Никогда true в продакшене!
         logging: false
       };
       
@@ -104,6 +100,11 @@ const initializeDatabase = async () => {
       console.log("🔄 Режим разработки: sync выполнен");
     } else {
       // В production вообще не вызываем sync
+        const syncOptions = {
+        force: true, // ⚠️ Никогда true в продакшене!
+      };
+      
+      await sequelize.sync(syncOptions);
       console.log("🔒 Production: sync пропущен, используйте миграции");
     }
 
