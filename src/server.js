@@ -5,9 +5,33 @@ const { initializeDatabase } = require("./models"); // Функция иници
 
 const PORT = process.env.PORT || 3000;
 
+// Валидация критических переменных окружения
+const validateEnvironment = () => {
+  const requiredVars = [];
+  
+  // SECRET_KEY обязателен для JWT
+  if (!process.env.SECRET_KEY) {
+    requiredVars.push('SECRET_KEY');
+  }
+  
+  // TELEGRAM_BOT_TOKEN обязателен если бот включен
+  if (process.env.ENABLE_BOT !== 'false' && !process.env.TELEGRAM_BOT_TOKEN) {
+    requiredVars.push('TELEGRAM_BOT_TOKEN');
+  }
+  
+  if (requiredVars.length > 0) {
+    throw new Error(
+      `❌ Отсутствуют обязательные переменные окружения: ${requiredVars.join(', ')}\n` +
+      `Пожалуйста, установите их в файле .env или переменных окружения.`
+    );
+  }
+};
+
 // Асинхронная функция запуска
 const startServer = async () => {
   try {
+    // Валидация переменных окружения
+    validateEnvironment();
     console.log("🔧 ===== ИНФОРМАЦИЯ О СРЕДЕ =====");
     console.log(`🌍 NODE_ENV: ${process.env.NODE_ENV}`);
     console.log(
@@ -38,7 +62,7 @@ const startServer = async () => {
 
     // После инициализации БД добавляем:
     console.log("🔄 Инициализация Telegram бота...");
-    require("../src/bot/comand"); // Это запустит нашего бота
+    require("./bot/comand"); // Это запустит нашего бота
 
     // 2. Затем запускаем сервер
     app.listen(PORT, () => {

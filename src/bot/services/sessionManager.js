@@ -1,49 +1,109 @@
 //src/bot/services/sessionManager.js
+const { models } = require("../../models");
+const { Session, User } = models;
+
 class SessionManager {
   constructor() {
-    // Создаём хранилище для сессий (ключ: chatId, значение: данные пользователя)
-    this.sessions = new Map(); 
     // Создаём хранилище для попыток входа (ключ: chatId, значение: процесс логина)
-    this.loginAttempts = new Map(); 
+    // Это временные данные процесса логина, не храним в БД
+    this.loginAttempts = new Map();
+    // Создаём хранилище для процесса редактирования вакансий (ключ: chatId, значение: данные редактирования)
+    // Это временные данные процесса редактирования, не храним в БД
+    this.editingVacancies = new Map();
   }
 
   // Создание сессии - "заселяем пользователя в номер"
-  createSession(chatId, userData) {
-    // Создаём объект сессии с данными пользователя и временными метками
-    const session = {
-      user: userData,           // Данные пользователя (id, email)
-      createdAt: new Date(),    // Когда создана сессия
-      lastActivity: new Date()  // Когда пользователь последний раз был активен
-    };
-    // Сохраняем сессию в хранилище
-    this.sessions.set(chatId, session);
-    // Возвращаем созданную сессию (можно использовать если нужно)
-    return session;
+  async createSession(chatId, userData) {
+    try {
+      // Проверяем, существует ли уже сессия для этого chatId
+      const existingSession = await Session.findByPk(String(chatId));
+      
+      if (existingSession) {
+        // Обновляем существующую сессию
+        existingSession.userId = userData.id;
+        existingSession.lastActivity = new Date();
+        await existingSession.save();
+        
+        return {
+          user: userData,
+          createdAt: existingSession.createdAt,
+          lastActivity: existingSession.lastActivity
+        };
+      } else {
+        // Создаём новую сессию в БД
+        const session = await Session.create({
+          chatId: String(chatId),
+          userId: userData.id,
+          lastActivity: new Date()
+        });
+        
+        return {
+          user: userData,
+          createdAt: session.createdAt,
+          lastActivity: session.lastActivity
+        };
+      }
+    } catch (error) {
+      console.error("Ошибка при создании сессии:", error);
+      throw error;
+    }
   }
 
   // Получение сессии - "проверяем кто в номере"
-  getSession(chatId) {
-    // Достаём сессию из хранилища по chatId
-    const session = this.sessions.get(chatId);
-    // Если сессия найдена - обновляем время последней активности
-    if (session) {
-      session.lastActivity = new Date(); // Пользователь что-то сделал - обновляем время
+  async getSession(chatId) {
+    try {
+      // Ищем сессию в БД с загрузкой данных пользователя
+      const session = await Session.findByPk(String(chatId), {
+        include: [{
+          model: User,
+          attributes: ['id', 'email']
+        }]
+      });
+      
+      if (!session) {
+        return undefined;
+      }
+      
+      // Обновляем время последней активности
+      session.lastActivity = new Date();
+      await session.save();
+      
+      // Возвращаем сессию в формате, совместимом со старым API
+      return {
+        user: {
+          id: session.User.id,
+          email: session.User.email
+        },
+        createdAt: session.createdAt,
+        lastActivity: session.lastActivity
+      };
+    } catch (error) {
+      console.error("Ошибка при получении сессии:", error);
+      return undefined;
     }
-    // Возвращаем сессию (или undefined если не найдена)
-    return session;
   }
 
   // Удаление сессии - "выселяем пользователя из номера"
-  deleteSession(chatId) {
-    // Удаляем сессию из хранилища
-    this.sessions.delete(chatId);
-    // ⚠️ НЕТ return - метод просто удаляет, ничего не возвращает
+  async deleteSession(chatId) {
+    try {
+      await Session.destroy({
+        where: { chatId: String(chatId) }
+      });
+    } catch (error) {
+      console.error("Ошибка при удалении сессии:", error);
+      throw error;
+    }
   }
 
   // Проверка аутентификации - "проверяем заселен ли пользователь"
-  isAuthenticated(chatId) {
-    // Проверяем существует ли сессия с таким chatId
-    return this.sessions.has(chatId);
+  async isAuthenticated(chatId) {
+    try {
+      const session = await Session.findByPk(String(chatId));
+      return !!session;
+    } catch (error) {
+      console.error("Ошибка при проверке аутентификации:", error);
+      return false;
+    }
   }
 
   // Начало процесса логина - "пользователь подошёл к стойке регистрации"
@@ -83,6 +143,21 @@ class SessionManager {
     // Удаляем попытку входа из хранилища
     this.loginAttempts.delete(chatId);
     // ⚠️ НЕТ return - просто очищаем
+  }
+
+  // Начало процесса редактирования вакансии
+  startEditingVacancy(chatId, editingData) {
+    this.editingVacancies.set(chatId, editingData);
+  }
+
+  // Получение данных о процессе редактирования вакансии
+  getEditingVacancy(chatId) {
+    return this.editingVacancies.get(chatId);
+  }
+
+  // Очистка процесса редактирования вакансии
+  clearEditingVacancy(chatId) {
+    this.editingVacancies.delete(chatId);
   }
 }
 

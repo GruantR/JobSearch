@@ -9,21 +9,21 @@ class userHandlers {
     async handleMeAndProfileComand(msg) {
         const chatId = msg.chat.id;
         try {
-            if (!sessionManager.isAuthenticated(chatId)) {
-                bot.sendMessage(chatId, '❌ Сначала войдите в систему через /login');
+            if (!(await sessionManager.isAuthenticated(chatId))) {
+                await bot.sendMessage(chatId, '❌ Сначала войдите в систему через /login');
                 return;
             }
-            const session = sessionManager.getSession(chatId);
+            const session = await sessionManager.getSession(chatId);
             const userData = await UsersServices.getUserById(session.user.id);
             const userProfile = await UserProfileService.getUserProfile(session.user.id)
             const message = this.formatUserInfo(userData,userProfile)
             
-            bot.sendMessage(chatId, message)
+            await bot.sendMessage(chatId, message)
 
 
         } catch (error) {
             const message = handleBotError(error);
-            bot.sendMessage(chatId, message);
+            await bot.sendMessage(chatId, message);
         }
     }
 

@@ -7,18 +7,18 @@ const { handleBotError } = require("../utils/errorHandler");
 
 class AuthHandlers {
   // Обработчик команды /login
-  handleLoginCommand(bot, msg) {
+  async handleLoginCommand(bot, msg) {
     const chatId = msg.chat.id;
 
-    if (sessionManager.isAuthenticated(chatId)) {
+    if (await sessionManager.isAuthenticated(chatId)) {
       // Пользователь уже вошёл - получить его сессию и сказать "Вы уже вошли как ..."
-      const session = sessionManager.getSession(chatId);
-      bot.sendMessage(chatId, `Вы уже вошли как ${session.user.email}`);
+      const session = await sessionManager.getSession(chatId);
+      await bot.sendMessage(chatId, `Вы уже вошли как ${session.user.email}`);
     } else {
       // Пользователь не вошёл - начать процесс логина
       // и отправить сообщение "Введите email:"
       sessionManager.startLoginAttempt(chatId);
-      bot.sendMessage(chatId, "Введите ваш email:");
+      await bot.sendMessage(chatId, "Введите ваш email:");
     }
 
     // TODO: Проверить если пользователь УЖЕ вошёл
@@ -26,16 +26,16 @@ class AuthHandlers {
     // TODO: Если нет - начать процесс логина
   }
 
-  handleLogoutCommand(msg) {
+  async handleLogoutCommand(msg) {
     const chatId = msg.chat.id;
-    if (!sessionManager.isAuthenticated(chatId)) {
-      bot.sendMessage(chatId, `Вы не в системе`);
+    if (!(await sessionManager.isAuthenticated(chatId))) {
+      await bot.sendMessage(chatId, `Вы не в системе`);
       return;
     } else {
-      const session = sessionManager.getSession(chatId);
+      const session = await sessionManager.getSession(chatId);
       const userEmail = session.user.email;
-      sessionManager.deleteSession(chatId);
-      bot.sendMessage(
+      await sessionManager.deleteSession(chatId);
+      await bot.sendMessage(
         chatId,
         `✅ Успешный выход из системы\n\n` +
           `До свидания, ${userEmail}!\n\n` +
@@ -45,7 +45,7 @@ class AuthHandlers {
   }
 
   // Обработчик ввода email
-  handleEmailInput(bot, msg) {
+  async handleEmailInput(bot, msg) {
     const chatId = msg.chat.id;
     const email = msg.text;
 
@@ -53,20 +53,20 @@ class AuthHandlers {
 
     //Проверяем что пользователь действительно в процессе логина
     if (!attempt) {
-      bot.sendMessage(chatId, "❌ Сначала используйте /login");
+      await bot.sendMessage(chatId, "❌ Сначала используйте /login");
       return;
     }
     if (email.length < 3 || !email.includes("@") || !email.includes(".")) {
-      bot.sendMessage(chatId, "❌ Это не похоже на email. Попробуйте снова:");
+      await bot.sendMessage(chatId, "❌ Это не похоже на email. Попробуйте снова:");
       return;
     }
 
     if (email.length > 100) {
-      bot.sendMessage(chatId, "❌ Email слишком длинный. Попробуйте снова:");
+      await bot.sendMessage(chatId, "❌ Email слишком длинный. Попробуйте снова:");
       return;
     }
     sessionManager.setLoginEmail(chatId, email);
-    bot.sendMessage(chatId, "🔒 Введите пароль:");
+    await bot.sendMessage(chatId, "🔒 Введите пароль:");
 
     // TODO: Проверить формат email
     // TODO: Если формат неправильный - попросить ввести снова
@@ -80,13 +80,13 @@ class AuthHandlers {
     const attempt = sessionManager.getLoginAttempt(chatId);
     // Проверяем что есть активная попытка логина
     if (!attempt || !attempt.email) {
-      bot.sendMessage(chatId, "❌ Сначала введите email через /login");
+      await bot.sendMessage(chatId, "❌ Сначала введите email через /login");
       return;
     }
     if (password.length < 6) {
-      bot.sendMessage(
+      await bot.sendMessage(
         chatId,
-        "❌ пароль не может быть короче 6 смволов. Попробуйте снова:"
+        "❌ пароль не может быть короче 6 символов. Попробуйте снова:"
       );
       return;
     }
@@ -96,7 +96,7 @@ class AuthHandlers {
         attempt.email,
         password
       );
-      sessionManager.createSession(chatId, result.user);
+      await sessionManager.createSession(chatId, result.user);
       sessionManager.clearLoginAttempt(chatId);
        // 🔥 ПОКАЗЫВАЕМ ГЛАВНОЕ МЕНЮ ПОСЛЕ УСПЕШНОГО ЛОГИНА
       menuHandlers.showMainMenu(chatId, `✅ Вы вошли как ${result.user.email}`);
@@ -104,7 +104,7 @@ class AuthHandlers {
  
     } catch (error) {
       const message = handleBotError(error);
-      bot.sendMessage(chatId, message);
+      await bot.sendMessage(chatId, message);
       sessionManager.clearLoginAttempt(chatId);
 
       // TODO: Достать email из loginAttempt

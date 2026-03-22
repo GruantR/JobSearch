@@ -29,8 +29,8 @@ bot.onText(/\/start/, async (msg) => {
   
   await bot.sendPhoto(chatId, 'https://tlgrm.ru/_/stickers/1b5/0ab/1b50abf8-8451-40ca-be37-ffd7aa74ec4d/50.jpg');
   
-  if (SessionManager.isAuthenticated(chatId)) {
-    const session = SessionManager.getSession(chatId);
+  if (await SessionManager.isAuthenticated(chatId)) {
+    const session = await SessionManager.getSession(chatId);
     message += `✅ Вы вошли как: ${session.user.email}\n\n`;
     message += `Используйте /menu для доступа ко всем функциям`;
   } else {
@@ -42,24 +42,26 @@ bot.onText(/\/start/, async (msg) => {
   await bot.sendMessage(chatId, message);
 });
 
-bot.onText(/\/login/, (msg) => {
-  authHandlers.handleLoginCommand(bot, msg);
+bot.onText(/\/login/, async (msg) => {
+  await authHandlers.handleLoginCommand(bot, msg);
 });
 
-bot.onText(/\/logout/, (msg) => {
-  authHandlers.handleLogoutCommand(msg);
+bot.onText(/\/logout/, async (msg) => {
+  await authHandlers.handleLogoutCommand(msg);
 });
 
 bot.onText(/^\/me$/, async (msg) => {
   await userHandlers.handleMeAndProfileComand(msg);
 });
 
-bot.onText(/\/vacancies/, (msg) => {
-  vacancyHandlers.handleVacanciesCommand(msg);
+bot.onText(/\/vacancies/, async (msg) => {
+  await vacancyHandlers.handleVacanciesCommand(msg);
 });
 
-bot.onText(/\/vacancy (.+)/, (msg, match) => {
-  vacancyHandlers.handleVacancyCommand(bot, msg, match);
+bot.onText(/\/vacancy (.+)/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const vacancyId = match[1];
+  await vacancyHandlers.handleVacancyCommand(chatId, vacancyId);
 });
 
 bot.onText(/\/game/, async (msg) => {
@@ -67,18 +69,18 @@ bot.onText(/\/game/, async (msg) => {
   await newGame(chatId);
 });
 
-bot.onText(/^\/menu$/, (msg) => {
+bot.onText(/^\/menu$/, async (msg) => {
   const chatId = msg.chat.id;
-  if (!SessionManager.isAuthenticated(chatId)) {
-    bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
+  if (!(await SessionManager.isAuthenticated(chatId))) {
+    await bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
     return;
   }
   menuHandlers.showMainMenu(chatId);
 });
 
-bot.onText(/\/help/, (msg) => {
+bot.onText(/\/help/, async (msg) => {
   const chatId = msg.chat.id;
-  const isAuthenticated = SessionManager.isAuthenticated(chatId);
+  const isAuthenticated = await SessionManager.isAuthenticated(chatId);
 
   let message = `🤖 **JobSearch Bot - Справка по командам**\n\n`;
 
@@ -101,7 +103,7 @@ bot.onText(/\/help/, (msg) => {
     message += `└ /game - Мини-игра\n`;
   }
 
-  bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+  await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
 });
 
 // 📨 ОБРАБОТКА ОБЫЧНЫХ СООБЩЕНИЙ
@@ -116,7 +118,7 @@ bot.on('message', async (msg) => {
     const loginAttempt = SessionManager.getLoginAttempt(chatId);
     if (loginAttempt) {
       if (loginAttempt.step === 'email') {
-        authHandlers.handleEmailInput(bot, msg);
+        await authHandlers.handleEmailInput(bot, msg);
       } else if (loginAttempt.step === 'password') {
         await authHandlers.handlePasswordInput(bot, msg);
       }
@@ -124,17 +126,20 @@ bot.on('message', async (msg) => {
     }
 
     // ✏️ Обработка редактирования вакансии
-    const session = SessionManager.getSession(chatId);
-    if (session?.editingVacancy?.step === 'awaiting_input') {
-      await vacancyHandlers.start2EditVacancyField(chatId, text, session);
+    const editingVacancy = SessionManager.getEditingVacancy(chatId);
+    if (editingVacancy?.step === 'awaiting_input') {
+      const session = await SessionManager.getSession(chatId);
+      if (session) {
+        await vacancyHandlers.start2EditVacancyField(chatId, text, session);
+      }
       return;
     }
 
-    bot.sendMessage(chatId, '🤔 Я понимаю только команды. Напиши /help для справки');
+    await bot.sendMessage(chatId, '🤔 Я понимаю только команды. Напиши /help для справки');
 
   } catch (error) {
     console.error('Ошибка в обработчике сообщений:', error);
-    bot.sendMessage(chatId, '❌ Произошла непредвиденная ошибка');
+    await bot.sendMessage(chatId, '❌ Произошла непредвиденная ошибка');
   }
 });
 
@@ -165,19 +170,19 @@ bot.on('callback_query', async (callbackQuery) => {
     else if (data.startsWith('editVacancy_')) {
       const vacancyId = data.split('_')[1];
       await vacancyHandlers.handleVacancyCommand(chatId, vacancyId);
-      vacancyHandlers.showEditMenu(chatId, vacancyId);
+      await vacancyHandlers.showEditMenu(chatId, vacancyId);
     }
     else if (data.startsWith('editDataVacancy_')) {
       const parts = data.split('_');
       const vacancyId = parts[1];
       const editModule = parts[2];
       await vacancyHandlers.startEditVacancyField(chatId, vacancyId, editModule);
-      bot.sendMessage(chatId, 'Введите новое значение:');
+      await bot.sendMessage(chatId, 'Введите новое значение:');
     }
     else if (data.startsWith('cancel_editDataVacancy_')) {
       const vacancyId = data.split('_')[2];
       await vacancyHandlers.handleVacancyCommand(chatId, vacancyId);
-      vacancyHandlers.showEditMenu(chatId, vacancyId);
+      await vacancyHandlers.showEditMenu(chatId, vacancyId);
     }
     else if (data.startsWith('cancel_editVacancy_')) {
       const vacancyId = data.split('_')[2];
@@ -192,13 +197,13 @@ bot.on('callback_query', async (callbackQuery) => {
       await userHandlers.handleMeAndProfileComand(msg);
     }
     else if (data === 'menu_logout') {
-      authHandlers.handleLogoutCommand(msg);
+      await authHandlers.handleLogoutCommand(msg);
     }
     else if (data === 'menu_analytics') {
-      bot.sendMessage(chatId, "📊 Аналитика в разработке...");
+      await bot.sendMessage(chatId, "📊 Аналитика в разработке...");
     }
     else if (data === 'menu_recruiters') {
-      bot.sendMessage(chatId, "👥 Рекрутеры в разработке...");
+      await bot.sendMessage(chatId, "👥 Рекрутеры в разработке...");
     }
 
     // 🎮 ИГРА
@@ -219,12 +224,12 @@ bot.on('callback_query', async (callbackQuery) => {
     }
 
     // ✅ Подтверждаем нажатие кнопки
-    bot.answerCallbackQuery(callbackQuery.id);
+    await bot.answerCallbackQuery(callbackQuery.id);
 
   } catch (error) {
     console.error('Ошибка в callback_query:', error);
-    bot.sendMessage(chatId, '❌ Произошла ошибка при обработке действия');
-    bot.answerCallbackQuery(callbackQuery.id);
+    await bot.sendMessage(chatId, '❌ Произошла ошибка при обработке действия');
+    await bot.answerCallbackQuery(callbackQuery.id);
   }
 });
 

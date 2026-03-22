@@ -27,15 +27,25 @@ const shouldRunBot = () => {
 
 
 if (shouldRunBot()) {
-  if (process.env.NODE_ENV === 'production' && webhookUrl) {
-    // В production используем webhook
-    bot = new TelegramBot(botToken);
-    bot.setWebHook(`${webhookUrl}/bot${botToken}`);
-    console.log('🤖 Бот запущен в production с webhook');
+  if (!botToken) {
+    console.error('❌ TELEGRAM_BOT_TOKEN не установлен. Бот не будет запущен.');
+    bot = null;
   } else {
-    // В development используем polling
-    bot = new TelegramBot(botToken, { polling: true });
-    console.log('🤖 Бот запущен в development с polling');
+    try {
+      if (process.env.NODE_ENV === 'production' && webhookUrl) {
+        // В production используем webhook
+        bot = new TelegramBot(botToken);
+        bot.setWebHook(`${webhookUrl}/bot${botToken}`);
+        console.log('🤖 Бот запущен в production с webhook');
+      } else {
+        // В development используем polling
+        bot = new TelegramBot(botToken, { polling: true });
+        console.log('🤖 Бот запущен в development с polling');
+      }
+    } catch (error) {
+      console.error('❌ Ошибка при создании бота:', error.message);
+      bot = null;
+    }
   }
 } else {
   // Создаем заглушку для экспорта
