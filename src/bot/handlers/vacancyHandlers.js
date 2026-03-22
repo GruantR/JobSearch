@@ -21,20 +21,21 @@ class VacancyHandlers {
   async handleVacanciesCommand(msg) {
     const chatId = msg.chat.id;
     try {
-      if (!sessionManager.isAuthenticated(chatId)) {
-        bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
+      if (!(await sessionManager.isAuthenticated(chatId))) {
+        await bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
         return;
       }
 
-      const session = sessionManager.getSession(chatId);
+      const session = await sessionManager.getSession(chatId);
       const vacancies = await VacanciesService.getVacancies(session.user.id);
 
       if (vacancies.length === 0) {
-        bot.sendMessage(chatId, "📭 У вас пока нет вакансий.");
+        await bot.sendMessage(chatId, "📭 У вас пока нет вакансий.");
         return;
       }
 
-      vacancies.forEach((vacancy) => {
+      // Используем for...of вместо forEach для корректной работы с async
+      for (const vacancy of vacancies) {
         const emoji = this.statusEmojis[vacancy.status] || "📄";
         const message = `${emoji} **${vacancy.jobTitle || "Без названия"}**\n🏢 ${vacancy.companyName}\n💰 ${vacancy.salary || "З/П не указана"}`;
 
@@ -48,23 +49,23 @@ class VacancyHandlers {
           ],
         };
 
-        bot.sendMessage(chatId, message, {
+        await bot.sendMessage(chatId, message, {
           reply_markup: keyboard,
         });
-      });
+      }
     } catch (error) {
-      bot.sendMessage(chatId, handleBotError(error));
+      await bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
   async showStatusMenu(chatId, vacancyId, messageId) {
     try {
-      if (!sessionManager.isAuthenticated(chatId)) {
-        bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
+      if (!(await sessionManager.isAuthenticated(chatId))) {
+        await bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
         return;
       }
 
-      const session = sessionManager.getSession(chatId);
+      const session = await sessionManager.getSession(chatId);
       const vacancy = await VacanciesService.getVacancy(parseInt(vacancyId), session.user.id);
 
       const message = `📋 **Выберите новый статус для вакансии:**\n\n"${vacancy.jobTitle}"\n\nТекущий статус: ${this.statusEmojis[vacancy.status]}`;
@@ -98,41 +99,41 @@ class VacancyHandlers {
         reply_markup: keyboard,
       });
     } catch (error) {
-      bot.sendMessage(chatId, handleBotError(error));
+      await bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
   async handleStatusChange(bot, chatId, vacancyId, newStatus, messageId) {
     try {
-      if (!sessionManager.isAuthenticated(chatId)) {
-        bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
+      if (!(await sessionManager.isAuthenticated(chatId))) {
+        await bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
         return;
       }
 
-      const session = sessionManager.getSession(chatId);
+      const session = await sessionManager.getSession(chatId);
       await VacanciesService.updateVacancyStatus(parseInt(vacancyId), session.user.id, newStatus);
 
       const successMessage = `✅ Статус обновлен: ${this.statusEmojis[newStatus]}`;
       await bot.sendMessage(chatId, successMessage);
       await this.handleVacancyCommand(chatId, vacancyId);
     } catch (error) {
-      bot.sendMessage(chatId, handleBotError(error));
+      await bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
   async handleVacancyCommand(chatId, vacancyId) {
     try {
-      if (!sessionManager.isAuthenticated(chatId)) {
-        bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
+      if (!(await sessionManager.isAuthenticated(chatId))) {
+        await bot.sendMessage(chatId, "❌ Сначала войдите в систему через /login");
         return;
       }
 
       if (!/^\d+$/.test(vacancyId)) {
-        bot.sendMessage(chatId, "❌ Неверный формат ID. Используйте: /vacancy <число>");
+        await bot.sendMessage(chatId, "❌ Неверный формат ID. Используйте: /vacancy <число>");
         return;
       }
 
-      const session = sessionManager.getSession(chatId);
+      const session = await sessionManager.getSession(chatId);
       const vacancy = await VacanciesService.getVacancy(vacancyId, session.user.id);
 
       const message = this.formatVacancyDetails(vacancy);
@@ -148,15 +149,15 @@ class VacancyHandlers {
         ],
       };
       
-      bot.sendMessage(chatId, message, {
+      await bot.sendMessage(chatId, message, {
         reply_markup: keyboard,
       });
     } catch (error) {
-      bot.sendMessage(chatId, handleBotError(error));
+      await bot.sendMessage(chatId, handleBotError(error));
     }
   }
 
-  showEditMenu(chatId, vacancyId) {
+  async showEditMenu(chatId, vacancyId) {
     const keyboard = {
       reply_markup: {
         inline_keyboard: [
@@ -180,16 +181,16 @@ class VacancyHandlers {
       },
     };
 
-    bot.sendMessage(chatId, "Что хотите изменить?", keyboard);
+    await bot.sendMessage(chatId, "Что хотите изменить?", keyboard);
   }
 
   async startEditVacancyField(chatId, vacancyId, editModule) {
-    const session = sessionManager.getSession(chatId);
-    session.editingVacancy = {
+    const session = await sessionManager.getSession(chatId);
+    sessionManager.startEditingVacancy(chatId, {
       vacancyId: vacancyId,
       field: editModule,
       step: "awaiting_input",
-    };
+    });
 
     const vacancy = await VacanciesService.getVacancy(vacancyId, session.user.id);
     const keyboard = {
@@ -200,7 +201,7 @@ class VacancyHandlers {
       ],
     };
 
-    bot.sendMessage(chatId, `Текущее значение: ${vacancy[editModule] || "не указано"}`, {
+    await bot.sendMessage(chatId, `Текущее значение: ${vacancy[editModule] || "не указано"}`, {
       parse_mode: "Markdown",
       reply_markup: keyboard,
     });
@@ -208,16 +209,22 @@ class VacancyHandlers {
 
   async start2EditVacancyField(chatId, newValue, session) {
     try {
-      const { vacancyId, field } = session.editingVacancy;
+      const editingVacancy = sessionManager.getEditingVacancy(chatId);
+      if (!editingVacancy) {
+        await bot.sendMessage(chatId, "❌ Процесс редактирования не найден");
+        return;
+      }
+      
+      const { vacancyId, field } = editingVacancy;
       const updateData = { [field]: newValue };
       
       await VacanciesService.patchVacancyData(parseInt(vacancyId), session.user.id, updateData);
       
-      delete session.editingVacancy;
-      bot.sendMessage(chatId, "✅ Изменения сохранены!");
-      this.showEditMenu(chatId, vacancyId);
+      sessionManager.clearEditingVacancy(chatId);
+      await bot.sendMessage(chatId, "✅ Изменения сохранены!");
+      await this.showEditMenu(chatId, vacancyId);
     } catch (error) {
-      bot.sendMessage(chatId, handleBotError(error));
+      await bot.sendMessage(chatId, handleBotError(error));
     }
   }
 

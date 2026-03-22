@@ -5,7 +5,7 @@ const usersRoutes = require('./usersRoutes');
 const authRoutes = require('./authRoutes');
 const recruitersRoutes = require('./recruitersRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
-const vacanciesRoutes = require('./vacanciesRoutes') 
+const vacanciesRoutes = require('./vacanciesRoutes'); 
 
 router.get('/', (req, res) => {
     res.json({

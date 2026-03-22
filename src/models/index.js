@@ -7,6 +7,7 @@ const UserProfile = require("./UserProfile");
 const Recruiter = require("./Recruiter");
 const StatusHistory = require("./StatusHistory");
 const Vacancy = require("./Vacancy");
+const Session = require("./Session");
 
 // Определяем отношения
 // СВЯЗЬ ОДИН К ОДНОМУ
@@ -49,6 +50,17 @@ Vacancy.belongsTo(User, {
   foreignKey: "userId",         // Уточняем внешний ключ
 });
 
+// Связь User и Session: "У одного пользователя может быть много сессий"
+User.hasMany(Session, {
+  foreignKey: "userId",         // В таблице sessions будет столбец userId
+  onDelete: "CASCADE",          // При удалении User - удалить все его сессии
+});
+
+// Со стороны Session: "Сессия принадлежит пользователю"
+Session.belongsTo(User, {
+  foreignKey: "userId",         // Уточняем внешний ключ
+});
+
 // Рекрутер имеет много записей истории
 Recruiter.hasMany(StatusHistory, {
   foreignKey: 'entityId',
@@ -79,6 +91,7 @@ const models = {
   Recruiter,
   StatusHistory,
   Vacancy,
+  Session,
 };
 
 const initializeDatabase = async () => {
@@ -99,12 +112,7 @@ const initializeDatabase = async () => {
       await sequelize.sync(syncOptions);
       console.log("🔄 Режим разработки: sync выполнен");
     } else {
-      // В production вообще не вызываем sync
-        const syncOptions = {
-        force: true, // ⚠️ Никогда true в продакшене!
-      };
-      
-      await sequelize.sync(syncOptions);
+      // В production вообще не вызываем sync - используем миграции
       console.log("🔒 Production: sync пропущен, используйте миграции");
     }
 

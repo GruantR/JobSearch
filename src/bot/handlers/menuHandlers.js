@@ -1,7 +1,7 @@
 const bot = require("../bot");
 
 class MenuHandlers {
-  showMainMenu(chatId, additionalText = "") {
+  async showMainMenu(chatId, additionalText = "") {
     const message = additionalText 
       ? `${additionalText}\n\n🎯 *Главное меню*`
       : "🎯 *Главное меню*";
@@ -25,7 +25,7 @@ class MenuHandlers {
       }
     };
 
-        bot.sendMessage(chatId, message, {
+    await bot.sendMessage(chatId, message, {
       parse_mode: "Markdown",
       ...keyboard
     });
