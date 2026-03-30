@@ -7,14 +7,11 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
+    "dev": "NODE_ENV=development nodemon src/server.js",
     "dev:win": "set NODE_ENV=development&& nodemon src/server.js",
     "prod": "cross-env NODE_ENV=production node src/server.js",
     "prod:win": "set NODE_ENV=production&& node src/server.js",
-    "start": "node src/server.js",
-    "test": "jest --verbose",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "start": "node src/server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -27,14 +24,12 @@
     "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7",
+    "umzug": "^3.8.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
-    "jest": "^30.2.0",
-    "nodemon": "^3.1.10",
-    "sequelize-cli": "^6.6.3",
-    "supertest": "^7.1.4"
+    "nodemon": "^3.1.10"
   }
 }
