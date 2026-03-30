@@ -99,23 +99,15 @@ const initializeDatabase = async () => {
     await sequelize.authenticate();
     console.log(`✅ База данных подключена (${process.env.NODE_ENV})`);
 
-
-    // 🔴 ВАЖНО: В production НИКОГДА не используем sync!
-    if (process.env.NODE_ENV === "development") {
-      // Только в разработке
-      const syncOptions = {
-        alter: false, // ⚠️ Лучше false для безопасности
-        force: true, // ⚠️ Никогда true в продакшене!
-        logging: false
-      };
-      
-      await sequelize.sync(syncOptions);
-      console.log("🔄 Режим разработки: sync выполнен");
+    if (process.env.RUN_MIGRATIONS_ON_START === "false") {
+      console.log(
+        "⏭️  Миграции при старте отключены (RUN_MIGRATIONS_ON_START=false)"
+      );
     } else {
-      // В production вообще не вызываем sync - используем миграции
-      console.log("🔒 Production: sync пропущен, используйте миграции");
+      const { runMigrations } = require("../utils/runMigrations");
+      await runMigrations();
+      console.log("✅ Миграции применены");
     }
-
 
     return true;
   } catch (error) {

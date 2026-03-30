@@ -13,9 +13,13 @@ router.get('/', (req, res) => {
         version: '1.0.0',
         endpoints: {
             users: '/api/users',
-            health: '/api/health'
-        }
+            health: '/api/health',
+        },
     });
+});
+
+router.get('/health', (req, res) => {
+    res.json({ ok: true, service: 'jobsearch-api' });
 });
 
 router.use('/auth', authRoutes); 

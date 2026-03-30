@@ -1,5 +1,5 @@
 //src/server.js
-require("dotenv-flow").config();
+require("dotenv-flow").config({ default_node_env: "development" });
 const app = require("./app"); // Приложение Express
 const { initializeDatabase } = require("./models"); // Функция инициализации
 
