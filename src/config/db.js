@@ -1,6 +1,7 @@
 //src/config/db.js
 const Sequelize = require('sequelize');
-require("dotenv-flow").config();
+// Без NODE_ENV (например `npm start`) подхватываем .env.development, как в `npm run dev`
+require("dotenv-flow").config({ default_node_env: "development" });
 
 console.log('🔧 [DB Config] DATABASE_URL:', process.env.DATABASE_URL ? 'present' : 'missing');
 console.log('🔧 [DB Config] NODE_ENV:', process.env.NODE_ENV);
