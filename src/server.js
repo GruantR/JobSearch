@@ -49,7 +49,11 @@ const startServer = async () => {
     logger.info(`🚀 Сервер запущен: http://localhost:${PORT}`);
     logger.info(`📚 Документация: http://localhost:${PORT}/api-docs`);
     if (process.env.NODE_ENV === "production") {
-      logger.info(`🌐 Продакшен URL: https://jobsearch-xsjk.onrender.com`);
+      const publicUrl =
+        process.env.PUBLIC_URL ||
+        process.env.RENDER_EXTERNAL_URL ||
+        "(задайте PUBLIC_URL или RENDER_EXTERNAL_URL на Render)";
+      logger.info(`🌐 Публичный URL сервиса: ${publicUrl}`);
     }
     logger.info("🔧 ===============================");
 
@@ -64,6 +68,10 @@ const startServer = async () => {
     // После инициализации БД добавляем:
     logger.info("🔄 Инициализация Telegram бота...");
     require("./bot/comand"); // Это запустит нашего бота
+
+    const telegramBot = require("./bot/bot");
+    const { attachTelegramWebhook } = require("./bot/attachWebhook");
+    attachTelegramWebhook(app, telegramBot);
 
     // 2. Затем запускаем сервер
     app.listen(PORT, () => {

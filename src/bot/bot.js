@@ -1,57 +1,51 @@
 //bot/bot.js
-const TelegramBot = require('node-telegram-bot-api');
-const logger = require('../utils/logger');
-const { botToken, webhookUrl } = require('./config');
+const TelegramBot = require("node-telegram-bot-api");
+const logger = require("../utils/logger");
+const { botToken, webhookUrl } = require("./config");
 
 let bot;
 
-// Проверяем, запускать ли бота в текущем окружении
-const shouldRunBot = () => {
-  // Если в режиме разработки - всегда запускаем
-  if (process.env.NODE_ENV !== 'production') {
+function shouldRunBot() {
+  if (process.env.NODE_ENV !== "production") {
     return true;
   }
-  
-  // Если в продакшне - проверяем флаг
-  // Можно использовать переменную окружения
-  if (process.env.ENABLE_BOT === 'false') {
-    logger.info('🚫 Бот отключен в продакшне (ENABLE_BOT=false)');
+  if (process.env.ENABLE_BOT === "false") {
+    logger.info("🚫 Бот отключён в продакшене (ENABLE_BOT=false)");
     return false;
   }
-  
-  // По умолчанию в продакшне не запускаем, пока не настроены сессии
-  logger.info('⚠️  Бот в продакшне отключен. Настройте сессии через Sequelize');
-  return false;
-};
-
-
-
+  return true;
+}
 
 if (shouldRunBot()) {
   if (!botToken) {
-    logger.error('❌ TELEGRAM_BOT_TOKEN не установлен. Бот не будет запущен.');
+    logger.error("❌ TELEGRAM_BOT_TOKEN не установлен. Бот не будет запущен.");
     bot = null;
   } else {
     try {
-      if (process.env.NODE_ENV === 'production' && webhookUrl) {
-        // В production используем webhook
-        bot = new TelegramBot(botToken);
-        bot.setWebHook(`${webhookUrl}/bot${botToken}`);
-        logger.info('🤖 Бот запущен в production с webhook');
-      } else {
-        // В development используем polling
+      if (process.env.NODE_ENV === "production" && webhookUrl) {
+        bot = new TelegramBot(botToken, { polling: false });
+        const hook = `${webhookUrl}/bot${botToken}`;
+        bot.setWebHook(hook).catch((err) => {
+          logger.error("❌ setWebHook:", err.message || err);
+        });
+        logger.info("🤖 Бот в production: webhook →", hook.replace(botToken, "<token>"));
+      } else if (process.env.NODE_ENV === "production" && !webhookUrl) {
+        logger.warn(
+          "⚠️ Не задан PUBLIC_URL / RENDER_EXTERNAL_URL / WEBHOOK_BASE_URL — для Render задайте URL сервиса. Временно используется polling."
+        );
         bot = new TelegramBot(botToken, { polling: true });
-        logger.info('🤖 Бот запущен в development с polling');
+      } else {
+        bot = new TelegramBot(botToken, { polling: true });
+        logger.info("🤖 Бот в development: polling");
       }
     } catch (error) {
-      logger.error('❌ Ошибка при создании бота:', error.message);
+      logger.error("❌ Ошибка при создании бота:", error.message);
       bot = null;
     }
   }
 } else {
-  // Создаем заглушку для экспорта
   bot = null;
-  logger.info('⏸️  Бот не запущен');
+  logger.info("⏸️  Бот не запущен");
 }
-  
-  module.exports = bot;
+
+module.exports = bot;
