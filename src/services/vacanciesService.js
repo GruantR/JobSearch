@@ -1,5 +1,6 @@
 //src/services/vacanciesService.js
 
+const logger = require("../utils/logger");
 const { models } = require("../models/index");
 const { Vacancy, StatusHistory } = models;
 const {
@@ -60,7 +61,7 @@ class VacanciesService {
       throw new NotFoundError("Вакансия не найдена");
     }
     await vacancy.destroy();
-    console.log(
+    logger.info(
       `✅ Вакансия удалена: ${vacancy.companyName} - ${vacancy.jobTitle} (ID: ${vacancy.id})`
     );
     return {

@@ -1,4 +1,5 @@
 //src/services/recruitersServices.js
+const logger = require("../utils/logger");
 const { models } = require("../models/index");
 const { Recruiter, StatusHistory } = models;
 const {
@@ -58,7 +59,7 @@ class RecruiterService {
       throw new NotFoundError("Рекрутер не найден");
     }
     await recruiter.destroy();
-    console.log(
+    logger.info(
       `✅ Рекрутер удален: ${recruiter.fullName} (ID: ${recruiter.id})`
     );
     return {

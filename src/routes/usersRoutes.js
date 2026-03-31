@@ -4,6 +4,7 @@ const router = express.Router();
 const UsersControllers = require('../controllers/usersController');
 const UserProfileController = require('../controllers/userProfilesController');
 const authorizeToken = require('../middleware/authorizeToken');
+const requireAdmin = require('../middleware/requireAdmin');
 const UserRoutesValidation = require('../middleware/validators/userRoutesValidation');
 const handleValidationErrors = require('../middleware/errorHandlers/validationErrorHandler');
 
@@ -97,7 +98,7 @@ const handleValidationErrors = require('../middleware/errorHandlers/validationEr
  *                   success: false
  *                   message: 'Внутренняя ошибка сервера'
  */
-router.get('/all', authorizeToken, UsersControllers.getUsers);
+router.get('/all', authorizeToken, requireAdmin, UsersControllers.getUsers);
 /**
  * @swagger
  * /users/me:

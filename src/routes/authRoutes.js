@@ -1,9 +1,25 @@
 //src/routes/authRoutes.js
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const router = express.Router();
 const AuthController = require("../controllers/authController");
 const authRoutesValidation = require("../middleware/validators/authRoutesValidation");
 const handleValidationErrors = require("../middleware/errorHandlers/validationErrorHandler");
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number.parseInt(process.env.AUTH_RATE_LIMIT_MAX || "50", 10) || 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Слишком много запросов с этого адреса. Попробуйте позже.",
+    });
+  },
+});
+
+router.use(authLimiter);
 
 /**
  * @swagger

@@ -1,4 +1,5 @@
 //src/bot/services/sessionManager.js
+const logger = require("../../utils/logger");
 const { models } = require("../../models");
 const { Session, User } = models;
 
@@ -44,7 +45,7 @@ class SessionManager {
         };
       }
     } catch (error) {
-      console.error("Ошибка при создании сессии:", error);
+      logger.error("Ошибка при создании сессии:", error);
       throw error;
     }
   }
@@ -78,7 +79,7 @@ class SessionManager {
         lastActivity: session.lastActivity
       };
     } catch (error) {
-      console.error("Ошибка при получении сессии:", error);
+      logger.error("Ошибка при получении сессии:", error);
       return undefined;
     }
   }
@@ -90,7 +91,7 @@ class SessionManager {
         where: { chatId: String(chatId) }
       });
     } catch (error) {
-      console.error("Ошибка при удалении сессии:", error);
+      logger.error("Ошибка при удалении сессии:", error);
       throw error;
     }
   }
@@ -101,7 +102,7 @@ class SessionManager {
       const session = await Session.findByPk(String(chatId));
       return !!session;
     } catch (error) {
-      console.error("Ошибка при проверке аутентификации:", error);
+      logger.error("Ошибка при проверке аутентификации:", error);
       return false;
     }
   }

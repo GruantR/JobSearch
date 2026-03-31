@@ -1,5 +1,6 @@
 //bot/bot.js
 const TelegramBot = require('node-telegram-bot-api');
+const logger = require('../utils/logger');
 const { botToken, webhookUrl } = require('./config');
 
 let bot;
@@ -14,12 +15,12 @@ const shouldRunBot = () => {
   // Если в продакшне - проверяем флаг
   // Можно использовать переменную окружения
   if (process.env.ENABLE_BOT === 'false') {
-    console.log('🚫 Бот отключен в продакшне (ENABLE_BOT=false)');
+    logger.info('🚫 Бот отключен в продакшне (ENABLE_BOT=false)');
     return false;
   }
   
   // По умолчанию в продакшне не запускаем, пока не настроены сессии
-  console.log('⚠️  Бот в продакшне отключен. Настройте сессии через Sequelize');
+  logger.info('⚠️  Бот в продакшне отключен. Настройте сессии через Sequelize');
   return false;
 };
 
@@ -28,7 +29,7 @@ const shouldRunBot = () => {
 
 if (shouldRunBot()) {
   if (!botToken) {
-    console.error('❌ TELEGRAM_BOT_TOKEN не установлен. Бот не будет запущен.');
+    logger.error('❌ TELEGRAM_BOT_TOKEN не установлен. Бот не будет запущен.');
     bot = null;
   } else {
     try {
@@ -36,21 +37,21 @@ if (shouldRunBot()) {
         // В production используем webhook
         bot = new TelegramBot(botToken);
         bot.setWebHook(`${webhookUrl}/bot${botToken}`);
-        console.log('🤖 Бот запущен в production с webhook');
+        logger.info('🤖 Бот запущен в production с webhook');
       } else {
         // В development используем polling
         bot = new TelegramBot(botToken, { polling: true });
-        console.log('🤖 Бот запущен в development с polling');
+        logger.info('🤖 Бот запущен в development с polling');
       }
     } catch (error) {
-      console.error('❌ Ошибка при создании бота:', error.message);
+      logger.error('❌ Ошибка при создании бота:', error.message);
       bot = null;
     }
   }
 } else {
   // Создаем заглушку для экспорта
   bot = null;
-  console.log('⏸️  Бот не запущен');
+  logger.info('⏸️  Бот не запущен');
 }
   
   module.exports = bot;

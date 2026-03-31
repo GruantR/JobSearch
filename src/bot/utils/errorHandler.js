@@ -1,4 +1,5 @@
 //src/bot/utils/errorHandler.js
+const logger = require('../../utils/logger');
 const {
     AuthenticationError,
     NotFoundError,
@@ -9,7 +10,7 @@ const {
 } = require('../../errors/customErrors');
 
 function handleBotError(error) {
-    console.error('Ошибка в боте:', error.name, error.message);
+    logger.error('Ошибка в боте:', error.name, error.message);
 
     // 1. Обработка Sequelize ошибок
     if (error.name === 'SequelizeValidationError') {

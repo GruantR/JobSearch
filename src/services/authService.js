@@ -44,12 +44,19 @@ class AuthService {
     }
 
     const token = jwt.sign(
-      { userId: user.id.toString(), email: user.email },
+      {
+        userId: user.id.toString(),
+        email: user.email,
+        role: user.role,
+      },
       process.env.SECRET_KEY,
       { expiresIn: "24h" }
     );
 
-    return { token, user: { id: user.id, email: user.email } };
+    return {
+      token,
+      user: { id: user.id, email: user.email, role: user.role },
+    };
   }
 };
 module.exports = new AuthService();
