@@ -98,16 +98,16 @@ const models = {
 const initializeDatabase = async () => {
   try {
     await sequelize.authenticate();
-    logger.info(`✅ База данных подключена (${process.env.NODE_ENV})`);
+    logger.startup(`✅ База данных подключена (${process.env.NODE_ENV})`);
 
     if (process.env.RUN_MIGRATIONS_ON_START === "false") {
-      logger.info(
+      logger.startup(
         "⏭️  Миграции при старте отключены (RUN_MIGRATIONS_ON_START=false)"
       );
     } else {
       const { runMigrations } = require("../utils/runMigrations");
       await runMigrations();
-      logger.info("✅ Миграции применены");
+      logger.startup("✅ Миграции применены (или нечего применять)");
     }
 
     const { seedAdmin } = require("../seeders/seedAdmin");
