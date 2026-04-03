@@ -1,51 +1,96 @@
 //src middleware/errorHandlers/globalErrorHandler.js
 const handleSequelizeErrors = require("./sequelizeErrorHandler");
 const { AppError, StructuredValidationError } = require("../../errors/customErrors");
+const logger = require("../../utils/logger");
+
+const isProduction = process.env.NODE_ENV === "production";
+
+/** Ключи и паттерны имён полей, которые нельзя писать в логи. */
+function isSensitiveKey(key) {
+  const k = String(key).toLowerCase();
+  if (
+    k === "password" ||
+    k === "token" ||
+    k === "authorization" ||
+    k === "secret" ||
+    k === "accesstoken" ||
+    k === "refreshtoken" ||
+    k === "secretkey"
+  ) {
+    return true;
+  }
+  if (k.includes("password") || k.includes("secret")) return true;
+  if (k.endsWith("token")) return true;
+  return false;
+}
+
+/**
+ * Рекурсивно маскирует чувствительные поля в объекте тела запроса (копия для лога).
+ */
+function sanitizeBodyForLog(body, depth = 0) {
+  if (body === undefined || body === null) return body;
+  if (depth > 6) return "[MaxDepth]";
+  if (typeof body !== "object") return body;
+  if (Array.isArray(body)) {
+    return body.map((item) =>
+      item !== null && typeof item === "object"
+        ? sanitizeBodyForLog(item, depth + 1)
+        : item
+    );
+  }
+  const out = {};
+  for (const [key, value] of Object.entries(body)) {
+    if (isSensitiveKey(key)) {
+      out[key] = "[REDACTED]";
+      continue;
+    }
+    if (value !== null && typeof value === "object") {
+      out[key] = sanitizeBodyForLog(value, depth + 1);
+    } else {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+function buildErrorLogPayload(req, error) {
+  const base = {
+    message: error.message,
+    stack: error.stack,
+    url: req.url,
+    method: req.method,
+  };
+  if (isProduction) {
+    return base;
+  }
+  if (req.body !== undefined && req.body !== null && Object.keys(req.body).length > 0) {
+    base.body = sanitizeBodyForLog(req.body);
+  }
+  return base;
+}
 
 const globalErrorHandler = (error, req, res, next) => {
-  // 1. Логируем ошибку для разработчика
-  console.error("🔥 Error:", {
-    message: error.message, // Сообщение ошибки
-    stack: error.stack, // Стек вызовов (где произошла ошибка)
-    url: req.url, // Какой URL запрашивали
-    method: req.method, // Метод запроса (GET, POST, etc.)
-    body: req.body, // Данные запроса (для отладки)
-  });
+  logger.error("🔥 Error:", buildErrorLogPayload(req, error));
 
-  // 2. Обрабатываем ошибки Sequelize
-  // Преобразуем технические ошибки БД в понятные кастомные ошибки
   const processedError = handleSequelizeErrors(error);
 
-  // 3. Если это наша кастомная ошибка - используем ее статус код
   if (processedError instanceof AppError) {
-        // 🔥 ОСОБАЯ ОБРАБОТКА ДЛЯ StructuredValidationError
     if (processedError instanceof StructuredValidationError) {
       return res.status(processedError.statusCode).json({
         success: false,
         message: processedError.message,
-        errors: processedError.errors // 🔥 Отдаём структурированные ошибки
+        errors: processedError.errors,
       });
     }
-        // Обычные кастомные ошибки
     return res.status(processedError.statusCode).json({
-      success: false, // Единый формат ответа
-      message: processedError.message, // Понятное сообщение для клиента
-      
-
-      // В разработке можем показывать стектрейс
-      //...(process.env.NODE_ENV === 'development' && { stack: processedError.stack })
+      success: false,
+      message: processedError.message,
     });
   }
 
-  // 4. Непредвиденные ошибки (баги) - общий ответ
   return res.status(500).json({
     success: false,
     message: "Внутренняя ошибка сервера",
-    // В development режиме показываем детали для отладки
-    // ...(process.env.NODE_ENV === "development" && {
-    //   error: processedError.message,
-    //   stack: processedError.stack,
-    // }),
   });
 };
 

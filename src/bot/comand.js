@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const bot = require("./bot");
 const authHandlers = require('./handlers/authHandlers');
 const userHandlers = require('./handlers/userHandlers');
@@ -9,7 +10,11 @@ const { newGame, againGame, randomGameNumber } = require('./handlers/gameHandler
 
 
 // Ультра-простая версия
-if (!bot?.setMyCommands) return console.log('⏸️  Бот отключен'), module.exports = bot;
+if (!bot?.setMyCommands) {
+  logger.info('⏸️  Бот отключен');
+  module.exports = bot;
+  return;
+}
 
 // 📋 КОМАНДЫ БОТА (упрощенный список)
 bot.setMyCommands([
@@ -138,7 +143,7 @@ bot.on('message', async (msg) => {
     await bot.sendMessage(chatId, '🤔 Я понимаю только команды. Напиши /help для справки');
 
   } catch (error) {
-    console.error('Ошибка в обработчике сообщений:', error);
+    logger.error('Ошибка в обработчике сообщений:', error);
     await bot.sendMessage(chatId, '❌ Произошла непредвиденная ошибка');
   }
 });
@@ -227,10 +232,10 @@ bot.on('callback_query', async (callbackQuery) => {
     await bot.answerCallbackQuery(callbackQuery.id);
 
   } catch (error) {
-    console.error('Ошибка в callback_query:', error);
+    logger.error('Ошибка в callback_query:', error);
     await bot.sendMessage(chatId, '❌ Произошла ошибка при обработке действия');
     await bot.answerCallbackQuery(callbackQuery.id);
   }
 });
 
-console.log('✅ Команды бота зарегистрированы');
+logger.info('✅ Команды бота зарегистрированы');

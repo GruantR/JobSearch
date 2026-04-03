@@ -1,5 +1,6 @@
 //src/models/index.js
 const sequelize = require("../config/db");
+const logger = require("../utils/logger");
 
 // Импортируем модели
 const User = require("./User");
@@ -97,21 +98,24 @@ const models = {
 const initializeDatabase = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`✅ База данных подключена (${process.env.NODE_ENV})`);
+    logger.info(`✅ База данных подключена (${process.env.NODE_ENV})`);
 
     if (process.env.RUN_MIGRATIONS_ON_START === "false") {
-      console.log(
+      logger.info(
         "⏭️  Миграции при старте отключены (RUN_MIGRATIONS_ON_START=false)"
       );
     } else {
       const { runMigrations } = require("../utils/runMigrations");
       await runMigrations();
-      console.log("✅ Миграции применены");
+      logger.info("✅ Миграции применены");
     }
+
+    const { seedAdmin } = require("../seeders/seedAdmin");
+    await seedAdmin();
 
     return true;
   } catch (error) {
-    console.error("❌ Ошибка БД:", error.message);
+    logger.error("❌ Ошибка БД:", error.message);
     return false;
   }
 };

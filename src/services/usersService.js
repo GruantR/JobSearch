@@ -1,4 +1,5 @@
 // src/services/usersServices.js
+const logger = require("../utils/logger");
 const { models } = require("../models/index");
 const { User, UserProfile } = models;
 const bcrypt = require("bcrypt");
@@ -44,7 +45,7 @@ class UsersServices {
     }
     await UserProfile.destroy({ where: { userId: id } });
     await User.destroy({ where: { id } });
-    console.log(`Пользователь ${user.email} (ID: ${user.id}) удален`);
+    logger.info(`Пользователь ${user.email} (ID: ${user.id}) удален`);
     return {
       id: user.id,
       email: user.email

@@ -1,6 +1,7 @@
 const path = require("path");
 const Sequelize = require("sequelize");
 const sequelize = require("../config/db");
+const logger = require("./logger");
 
 /** Применяет pending-миграции из `src/migrations/`. */
 async function runMigrations() {
@@ -30,7 +31,7 @@ async function runMigrations() {
     logger: {
       info: () => {},
       warn: () => {},
-      error: console.error,
+      error: (msg) => logger.error(msg),
       debug: () => {},
     },
   });

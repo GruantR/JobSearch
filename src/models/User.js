@@ -25,6 +25,17 @@ const User = sequelize.define(
         },
       },
     },
+    role: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: "user",
+      validate: {
+        isIn: {
+          args: [["user", "admin"]],
+          msg: "Роль должна быть user или admin",
+        },
+      },
+    },
   },
   {
     tableName: "users", // чтобы точно знали, какая таблица

@@ -43,8 +43,6 @@ const authorizeToken = async (req, res, next) => {
 
     next();
   } catch (error) {
-      console.error("Ошибка в authorizeToken:", error);
-    // Если ошибка уже является нашей кастомной ошибкой - просто передаем дальше
     if (
       error instanceof AuthenticationError ||
       error instanceof ForbiddenError

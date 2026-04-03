@@ -1,10 +1,11 @@
 //src/config/db.js
 const Sequelize = require('sequelize');
+const logger = require("../utils/logger");
 // Без NODE_ENV (например `npm start`) подхватываем .env.development, как в `npm run dev`
 require("dotenv-flow").config({ default_node_env: "development" });
 
-console.log('🔧 [DB Config] DATABASE_URL:', process.env.DATABASE_URL ? 'present' : 'missing');
-console.log('🔧 [DB Config] NODE_ENV:', process.env.NODE_ENV);
+logger.info('🔧 [DB Config] DATABASE_URL:', process.env.DATABASE_URL ? 'present' : 'missing');
+logger.info('🔧 [DB Config] NODE_ENV:', process.env.NODE_ENV);
 
 let sequelize;
 
@@ -21,7 +22,7 @@ if (process.env.DATABASE_URL) {
     logging: getLogging(),
     pool: getPoolConfig()
   });
-  console.log("🔗 [DB Config] Подключение к Neon.tech (Production)");
+  logger.info("🔗 [DB Config] Подключение к Neon.tech (Production)");
 } else {
   // Development - используем отдельные переменные
   sequelize = new Sequelize(
@@ -36,15 +37,26 @@ if (process.env.DATABASE_URL) {
       pool: getPoolConfig()
     }
   );
-  console.log("🔗 [DB Config] Подключение к локальной PostgreSQL (Development)");
+  logger.info("🔗 [DB Config] Подключение к локальной PostgreSQL (Development)");
 }
 
 
 // Функции для вынесения общей логики
 function getLogging() {
+  // SQL-логи довольно шумные; включаем только при необходимости.
+  // Включить: LOG_SQL=true
+  if (process.env.LOG_SQL !== "true") {
+    return () => {};
+  }
+
   return (msg) => {
-    if (msg.includes('SELECT') || msg.includes('INSERT') || msg.includes('UPDATE') || msg.includes('DELETE')) {
-      console.log(msg);
+    if (
+      msg.includes("SELECT") ||
+      msg.includes("INSERT") ||
+      msg.includes("UPDATE") ||
+      msg.includes("DELETE")
+    ) {
+      logger.debug(msg);
     }
   };
 }

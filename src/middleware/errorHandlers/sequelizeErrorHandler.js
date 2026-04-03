@@ -15,6 +15,7 @@ const {
   ConflictError,
   StructuredValidationError,
 } = require("../../errors/customErrors");
+const logger = require("../../utils/logger");
 
 /**
  * Преобразует ошибки Sequelize в наши кастомные ошибки
@@ -92,8 +93,7 @@ AppValidationError {
 
   // Общая ошибка базы данных (синтаксис SQL, проблемы подключения и т.д.)
   if (error instanceof DatabaseError) {
-    // Логируем технические детали для разработчика
-    console.error("Database Error:", error);
+    logger.error("Database Error:", error);
     // Но пользователю показываем общее сообщение (безопасность!)
     return new AppValidationError("Ошибка базы данных");
   }

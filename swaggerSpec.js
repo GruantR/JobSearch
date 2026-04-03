@@ -62,6 +62,12 @@ const options = {
               example: "user@example.com",
               description: "Email пользователя",
             },
+            role: {
+              type: "string",
+              enum: ["user", "admin"],
+              example: "user",
+              description: "Роль: user или admin",
+            },
             createdAt: {
               type: "string",
               format: "date-time", // Формат даты-времени ISO
