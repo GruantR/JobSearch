@@ -13,9 +13,10 @@ async function seedAdmin() {
   const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD;
 
+  
   if (!email || !password) {
-    logger.info(
-      "⏭️  Сидер админа пропущен: задайте ADMIN_EMAIL и ADMIN_PASSWORD в .env"
+    logger.startup(
+      "⏭️  Сидер админа пропущен: задайте ADMIN_EMAIL и ADMIN_PASSWORD"
     );
     return;
   }
@@ -26,9 +27,9 @@ async function seedAdmin() {
   if (existing) {
     if (existing.role !== "admin") {
       await existing.update({ role: "admin" });
-      logger.info(`✅ Пользователь ${email} получил роль admin`);
+      logger.startup(`✅ Пользователь ${email} получил роль admin`);
     } else {
-      logger.info(`⏭️  Админ уже настроен: ${email}`);
+      logger.startup(`⏭️  Админ уже настроен: ${email}`);
     }
     return;
   }
@@ -38,7 +39,7 @@ async function seedAdmin() {
     password,
     role: "admin",
   });
-  logger.info(`✅ Создан администратор (seed): ${email}`);
+  logger.startup(`✅ Создан администратор (seed): ${email}`);
 }
 
 module.exports = { seedAdmin };
