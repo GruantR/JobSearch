@@ -43,8 +43,19 @@ if (process.env.DATABASE_URL) {
 
 // Функции для вынесения общей логики
 function getLogging() {
+  // SQL-логи довольно шумные; включаем только при необходимости.
+  // Включить: LOG_SQL=true
+  if (process.env.LOG_SQL !== "true") {
+    return () => {};
+  }
+
   return (msg) => {
-    if (msg.includes('SELECT') || msg.includes('INSERT') || msg.includes('UPDATE') || msg.includes('DELETE')) {
+    if (
+      msg.includes("SELECT") ||
+      msg.includes("INSERT") ||
+      msg.includes("UPDATE") ||
+      msg.includes("DELETE")
+    ) {
       logger.debug(msg);
     }
   };

@@ -35,7 +35,11 @@ function requestLogger (req, res, next) {
     next();
 }
 
-app.use(requestLogger);
+// По умолчанию убираем шум логирования каждого запроса в терминале.
+// Включать при необходимости: LOG_HTTP=true
+if (process.env.LOG_HTTP === "true") {
+  app.use(requestLogger);
+}
 
 // Dev-only UI for convenience. In production we don't serve anything from /front.
 if (process.env.NODE_ENV !== 'production') {
